@@ -2,6 +2,7 @@ package com.example.rajat.demo;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.graphics.Point;
@@ -15,12 +16,14 @@ import com.example.rajat.demo.model.Post;
 import com.example.rajat.demo.model.Response;
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Ref: https://proandroiddev.com/look-deep-into-viewpager2-13eb8e06e419
  * Ref: https://blog.mindorks.com/exploring-android-view-pager2-in-android
  * Ref: https://medium.com/better-programming/android-fragments-common-queries-mistakes-1c42e9f6b44f
+ * Ref: https://stackoverflow.com/questions/57885849/in-androidx-fragment-app-fragment-setuservisiblehint-is-deprecated-and-not-exec/57886441?noredirect=1#comment106884235_57886441
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -34,10 +37,9 @@ public class MainActivity extends AppCompatActivity {
 
         Gson gson = new Gson();
         Response response = gson.fromJson(Constants.JSON, Response.class);
-        List<Post> postsList = response.getPosts();
 
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager(), getLifecycle(),
-                postsList);
+        List<Post> postsList = response.getPosts();
+        ViewPagerAdapter adapter = new ViewPagerAdapter(this, postsList);
         binding.pager.setOrientation(ViewPager2.ORIENTATION_VERTICAL);
         binding.pager.setOffscreenPageLimit(1);
         binding.pager.setAdapter(adapter);
@@ -50,6 +52,16 @@ public class MainActivity extends AppCompatActivity {
 
         //hideSystemUI();
         setWindowScreenParameters();
+    }
+
+    List<Fragment> getFragmentList(List<Post> postList) {
+
+        List<Fragment> list = new ArrayList<>();
+
+        for (Post post : postList) {
+            list.add(new PostFragment(post));
+        }
+        return list;
     }
 
     private void hideSystemUI() {

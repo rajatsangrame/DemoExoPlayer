@@ -39,6 +39,7 @@ import java.util.List;
 public class PostFragment extends Fragment {
 
     private static final String TAG = "PostFragment";
+    private int fragmentIndex;
     private FragmentPostBinding binding;
     private Post mPost;
     private SimpleExoPlayer mPlayer;
@@ -48,6 +49,11 @@ public class PostFragment extends Fragment {
 
     private InteractionTemplateLayout.InteractiveItemClickListener interactionListener
             = this::updatePlay;
+
+    PostFragment(Post post, int fragmentIndex) {
+        mPost = post;
+        this.fragmentIndex = fragmentIndex;
+    }
 
     PostFragment(Post post) {
         mPost = post;
@@ -135,13 +141,13 @@ public class PostFragment extends Fragment {
 
     /**
      * Sample Urls:
-     *
+     * <p>
      * https://yovo-app.storage.googleapis.com/zuyYZmQWg/yo240p/intro.mp4
      * https://yovo-app.storage.googleapis.com/zuyYZmQWg/yo240p/1.mp4
      * https://yovo-app.storage.googleapis.com/zuyYZmQWg/yo240p/2.mp4
      * https://yovo-app.storage.googleapis.com/zuyYZmQWg/yo240p/boomerang.mp4
      * <p>
-
+     * <p>
      * Todo: Write the sequence of concatenation here and why
      *
      * @param post {@link Post}
@@ -252,7 +258,7 @@ public class PostFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        Log.i(TAG, "onStart: ");
+        Log.i(TAG, "onStart: " + fragmentIndex);
 
     }
 
@@ -260,7 +266,7 @@ public class PostFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        Log.i(TAG, "onResume: ");
+        Log.i(TAG, "onResume: " + fragmentIndex);
 
         setFragmentVisibility(true);
         resumePlayer();
@@ -270,7 +276,7 @@ public class PostFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
-        Log.i(TAG, "onPause: ");
+        Log.i(TAG, "onPause: " + fragmentIndex);
         setFragmentVisibility(false);
         resetPlayer();
 
@@ -280,19 +286,33 @@ public class PostFragment extends Fragment {
     public void onStop() {
         super.onStop();
 
-        Log.i(TAG, "onStop: ");
+        Log.i(TAG, "onStop: " + fragmentIndex);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        Log.i(TAG, "onDestroy: " + fragmentIndex);
+    }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
 
-        Log.i(TAG, "onDestroyView: ");
+        Log.i(TAG, "onDestroyView: " + fragmentIndex);
         if (Util.SDK_INT >= 24) {
             releasePlayer();
         }
     }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+
+        Log.i(TAG, "onDetach: " + fragmentIndex);
+    }
+
 
     private Player.EventListener eventListener = new Player.EventListener() {
 
@@ -371,6 +391,12 @@ public class PostFragment extends Fragment {
 
         }
     };
+
+    @Override
+    public void setRetainInstance(boolean retain) {
+        Log.i(TAG, "setRetainInstance: " + retain);
+        super.setRetainInstance(false);
+    }
 
     private void showBoomerangOptions(boolean visibility) {
 
