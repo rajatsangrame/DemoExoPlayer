@@ -20,6 +20,7 @@
             />
 
         <com.example.rajat.demo.mgpl.InteractionTemplateLayout
+            android:visibility="gone"
             android:id="@+id/interactionLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />

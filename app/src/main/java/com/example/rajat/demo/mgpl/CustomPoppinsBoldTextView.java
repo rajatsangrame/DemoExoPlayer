@@ -36,11 +36,13 @@ public class CustomPoppinsBoldTextView extends androidx.appcompat.widget.AppComp
 
     }
 
-    public CustomPoppinsBoldTextView(Context context, int strokeColor, float strokeWidth, String fontName) {
+    public CustomPoppinsBoldTextView(Context context, int strokeColor, float strokeWidth,
+                                     String fontName) {
         super(context);
         try {
             if (fontName != null) {
-                Typeface myTypeface = Typeface.createFromAsset(getContext().getAssets(), "fonts/" + fontName);
+                Typeface myTypeface = Typeface.createFromAsset(getContext().getAssets(),
+                        "fonts/" + fontName);
                 setTypeface(myTypeface);
             }
         } catch (Exception e) {
@@ -64,7 +66,8 @@ public class CustomPoppinsBoldTextView extends androidx.appcompat.widget.AppComp
 
             try {
                 if (fontName != null) {
-                    Typeface myTypeface = Typeface.createFromAsset(getContext().getAssets(), "fonts/" + fontName);
+                    Typeface myTypeface = Typeface.createFromAsset(getContext().getAssets(),
+                            "fonts/" + fontName);
                     setTypeface(myTypeface);
                 }
             } catch (Exception e) {
@@ -79,7 +82,8 @@ public class CustomPoppinsBoldTextView extends androidx.appcompat.widget.AppComp
     public void setFont(String fontName) {
         try {
             if (fontName != null) {
-                Typeface myTypeface = Typeface.createFromAsset(getContext().getAssets(), "fonts/" + fontName);
+                Typeface myTypeface = Typeface.createFromAsset(getContext().getAssets(),
+                        "fonts/" + fontName);
                 setTypeface(myTypeface);
             }
         } catch (Exception e) {
@@ -96,7 +100,8 @@ public class CustomPoppinsBoldTextView extends androidx.appcompat.widget.AppComp
     }
 
     private void setStrokeWidth(float width) {
-        strokeWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, width, Resources.getSystem().getDisplayMetrics());
+        strokeWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, width,
+                Resources.getSystem().getDisplayMetrics());
     }
 
 

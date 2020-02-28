@@ -75,8 +75,32 @@ public class PostFragment extends Fragment {
     private void init() {
 
         initializePlayer();
+        updateInteractiveLayout(mPost);
         binding.interactionLayout.setInteractiveItemClickListener(interactionListener);
 
+    }
+
+    private void updateInteractiveLayout(Post post) {
+
+        List<Gfs> gifList = new ArrayList<>();
+        int templateId = -1;
+        String font = "";
+        for (Data data : post.getTracks().getData()) {
+
+            if (data.getGfs() != null) {
+                gifList.addAll(data.getGfs());
+            }
+
+            if (data.getTemp() != null) {
+                font = data.getTemp().getFont();
+                templateId = data.getTemp().getType();
+            }
+        }
+        binding.interactionLayout.setFont(font);
+        binding.interactionLayout.setTemplateId(templateId);
+        for (int i = 0; i < gifList.size(); i++) {
+            binding.interactionLayout.addGf(gifList.get(i));
+        }
     }
 
     private void initializePlayer() {
@@ -110,9 +134,15 @@ public class PostFragment extends Fragment {
     }
 
     /**
-     * Sample https://yovo-app.storage.googleapis.com/tGOC_VLWa/yo240p/1.mp4
+     * Sample Urls:
+     *
+     * https://yovo-app.storage.googleapis.com/zuyYZmQWg/yo240p/intro.mp4
+     * https://yovo-app.storage.googleapis.com/zuyYZmQWg/yo240p/1.mp4
+     * https://yovo-app.storage.googleapis.com/zuyYZmQWg/yo240p/2.mp4
+     * https://yovo-app.storage.googleapis.com/zuyYZmQWg/yo240p/boomerang.mp4
      * <p>
-     * Write the sequence of concatenation and why
+
+     * Todo: Write the sequence of concatenation here and why
      *
      * @param post {@link Post}
      * @return {@link ConcatenatingMediaSource}
@@ -316,25 +346,6 @@ public class PostFragment extends Fragment {
                 mPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
                 showBoomerangOptions(true);
 
-                List<Gfs> gifList = new ArrayList<>();
-                int templateId = -1;
-                String font = "";
-                for (Data data : mPost.getTracks().getData()) {
-
-                    if (data.getGfs() != null) {
-                        gifList.addAll(data.getGfs());
-                    }
-
-                    if (data.getTemp() != null) {
-                        font = data.getTemp().getFont();
-                        templateId = data.getTemp().getType();
-                    }
-                }
-                binding.interactionLayout.setFont(font);
-                binding.interactionLayout.setTemplateId(templateId);
-                for (int i = 0; i < gifList.size(); i++) {
-                    binding.interactionLayout.addGf(gifList.get(i));
-                }
             } else {
 
                 mPlayer.setRepeatMode(Player.REPEAT_MODE_OFF);
