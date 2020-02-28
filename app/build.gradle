@@ -1,0 +1,71 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+    defaultConfig {
+        applicationId "com.example.rajat.demo"
+        minSdkVersion 21
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    dataBinding {
+        enabled = true
+    }
+//    sourceSets {
+//        main {
+//            java {
+//                srcDir 'src'
+//                exclude '**/uncompilable/**'
+//            }
+//        }
+//    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    //Testing
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    testImplementation "junit:junit:$rootProject.junit_version"
+    androidTestImplementation "androidx.test.ext:junit:$rootProject.junit_ext_version"
+    androidTestImplementation "androidx.test:rules:$rootProject.junit_runner_version"
+    androidTestImplementation "androidx.test:runner:$rootProject.junit_runner_version"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.espresso_version"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.espresso_version"
+    androidTestImplementation "androidx.test.espresso:espresso-contrib:$rootProject.espresso_version"
+    androidTestImplementation "androidx.test.uiautomator:uiautomator:$rootProject.uiautomator"
+    implementation "androidx.test.espresso:espresso-idling-resource:$rootProject.espresso_version"
+
+    //AndroidX and Material
+    implementation "androidx.appcompat:appcompat:$rootProject.appcompat_verison"
+    implementation "androidx.recyclerview:recyclerview:$rootProject.recycler_view_version"
+    implementation "androidx.constraintlayout:constraintlayout:$rootProject.constraint_layout_version"
+    implementation "com.google.android.material:material:$rootProject.material_version"
+
+    //ExoPlayer
+    implementation "com.google.android.exoplayer:exoplayer:$rootProject.exoplayer_version"
+    implementation "com.google.android.exoplayer:exoplayer-core:$rootProject.exoplayer_version"
+    implementation "com.google.android.exoplayer:exoplayer-dash:$rootProject.exoplayer_version"
+    implementation "com.google.android.exoplayer:exoplayer-ui:$rootProject.exoplayer_version"
+
+    //Gson
+    implementation "com.google.code.gson:gson:$rootProject.gson_verison"
+
+    implementation "androidx.viewpager2:viewpager2:1.0.0"
+
+    implementation 'org.parceler:parceler-api:1.1.12'
+    annotationProcessor 'org.parceler:parceler:1.1.12'
+}

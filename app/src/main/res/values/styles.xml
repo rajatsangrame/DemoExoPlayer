@@ -1,0 +1,31 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <declare-styleable name="RazorpayCustomTextView">
+        <attr name="fontName" format="string" />
+        <attr name="ctvStrokeColor" format="color" />
+        <attr name="ctvStrokeWidth" format="float" />
+    </declare-styleable>
+    <declare-styleable name="RazorpayCustomEditText">
+        <attr name="fontEditTextName" format="string" />
+    </declare-styleable>
+    <declare-styleable name="RazorpayCustomCheckBox">
+        <attr name="fontCheckBoxName" format="string" />
+    </declare-styleable>
+    <declare-styleable name="CustomPoppinsBoldStrokeTextView">
+        <attr name="strokeFontName" format="string" />
+        <attr name="strokeColor" format="color" />
+        <attr name="strokeWidth" format="dimension" />
+    </declare-styleable>
+    <declare-styleable name="CustomChip">
+        <attr name="chipFontName" format="string" />
+    </declare-styleable>
+
+</resources>
