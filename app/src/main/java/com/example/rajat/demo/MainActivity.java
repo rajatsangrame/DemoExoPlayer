@@ -24,6 +24,9 @@ import java.util.List;
  * Ref: https://blog.mindorks.com/exploring-android-view-pager2-in-android
  * Ref: https://medium.com/better-programming/android-fragments-common-queries-mistakes-1c42e9f6b44f
  * Ref: https://stackoverflow.com/questions/57885849/in-androidx-fragment-app-fragment-setuservisiblehint-is-deprecated-and-not-exec/57886441?noredirect=1#comment106884235_57886441
+ *
+ * Ref: offscreenPageLimit = 1
+ * https://juejin.im/post/5cda3964f265da035d0c9d8f
  */
 public class MainActivity extends AppCompatActivity {
 
