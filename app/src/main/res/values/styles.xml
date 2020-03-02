@@ -28,4 +28,14 @@
         <attr name="chipFontName" format="string" />
     </declare-styleable>
 
+    <declare-styleable name="VerticalViewPager2">
+        <attr name="orientation">
+            <enum name="vertical" value="0" />
+            <enum name="horizontal" value="1" />
+        </attr>
+        <attr name="circulatory" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="CameraVideoButton">
+        <attr name="cvb_recording_color" format="color" />
+    </declare-styleable>
 </resources>

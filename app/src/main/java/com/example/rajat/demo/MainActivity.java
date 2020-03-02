@@ -3,10 +3,15 @@ package com.example.rajat.demo;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.graphics.Point;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 
@@ -24,19 +29,23 @@ import java.util.List;
  * Ref: https://blog.mindorks.com/exploring-android-view-pager2-in-android
  * Ref: https://medium.com/better-programming/android-fragments-common-queries-mistakes-1c42e9f6b44f
  * Ref: https://stackoverflow.com/questions/57885849/in-androidx-fragment-app-fragment-setuservisiblehint-is-deprecated-and-not-exec/57886441?noredirect=1#comment106884235_57886441
- *
+ * <p>
  * Ref: offscreenPageLimit = 1
  * https://juejin.im/post/5cda3964f265da035d0c9d8f
  */
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
+    private MainActivityViewModel viewModel;
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        viewModel = new ViewModelProvider(this)
+                .get(MainActivityViewModel.class);
 
         Gson gson = new Gson();
         Response response = gson.fromJson(Constants.JSON, Response.class);
@@ -46,7 +55,31 @@ public class MainActivity extends AppCompatActivity {
         binding.pager.setOrientation(ViewPager2.ORIENTATION_VERTICAL);
         binding.pager.setOffscreenPageLimit(1);
         binding.pager.setAdapter(adapter);
+        disableCacheOfViewPager();
+        viewModel.updateLiveScore(0);
+        viewModel.getLiveScore().observe(this, score -> {
 
+            binding.tvScore.setText(String.format("Score: %s", score));
+            Log.i(TAG, "onCreate: " + score);
+        });
+
+
+    }
+
+    /**
+     * ViewPager2 is a @{@link RecyclerView}.
+     */
+    private void disableCacheOfViewPager() {
+
+        try {
+
+            ((RecyclerView) binding.pager.getChildAt(0)).getLayoutManager().setItemPrefetchEnabled(false);
+            ((RecyclerView) binding.pager.getChildAt(0)).setItemViewCacheSize(0);
+
+        } catch (NullPointerException e) {
+
+            Log.i(TAG, "disableCacheOfViewPager: " + e.getMessage());
+        }
     }
 
     @Override

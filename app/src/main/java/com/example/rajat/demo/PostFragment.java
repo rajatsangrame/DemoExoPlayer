@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.rajat.demo.databinding.FragmentPostBinding;
 import com.example.rajat.demo.mgpl.InteractionTemplateLayout;
@@ -46,11 +47,12 @@ public class PostFragment extends Fragment {
     private boolean fragmentVisibility = false;
     private int currentWindow = 0;
     private long playbackPosition = 0;
+    private MainActivityViewModel mainActivityViewModel;
 
     private InteractionTemplateLayout.InteractiveItemClickListener interactionListener
             = this::updatePlay;
 
-    PostFragment(Post post, int fragmentIndex) {
+    public PostFragment(Post post, int fragmentIndex) {
         mPost = post;
         this.fragmentIndex = fragmentIndex;
     }
@@ -66,6 +68,14 @@ public class PostFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        mainActivityViewModel = new ViewModelProvider(getActivity()).get(MainActivityViewModel.class);
     }
 
     @Override
@@ -136,6 +146,8 @@ public class PostFragment extends Fragment {
                 return Uri.parse(ulr);
             }
         }
+
+        Log.e(TAG, "getBoomerangUri: is null");
         return null;
     }
 
@@ -241,6 +253,7 @@ public class PostFragment extends Fragment {
     private void updatePlay(int position) {
 
         mPlayer.seekTo(2 * position, 0);
+        mainActivityViewModel.updateLiveScore(position);
 
     }
 
