@@ -1,6 +1,10 @@
 package com.example.rajat.demo;
 
 
+import android.app.Activity;
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,13 +41,20 @@ import com.google.android.exoplayer2.util.Util;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Ref: 360 Video https://stackoverflow.com/questions/60166742/how-to-enable-gyrosensors-for-exoplayer-360-videos
+ */
 public class PostFragment extends Fragment {
 
     private static final String TAG = "PostFragment";
+    //public static final String URL_360 = "https://raw.githubusercontent.com/rajatsangrame/temp/master/Shark%203d%20360%20-%20panocam3d.com.mp4";
+    public static final String URL_360 = "https://theyouthbuzz.com/ytplayer/Seoul8KVR3DTrailer.mp4";
+
     private int fragmentIndex;
     private FragmentPostBinding binding;
     private Post mPost;
     private SimpleExoPlayer mPlayer;
+    private SimpleExoPlayer mPlayerSpherical;
     private boolean fragmentVisibility = false;
     private int currentWindow = 0;
     private long playbackPosition = 0;
@@ -76,6 +87,11 @@ public class PostFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         mainActivityViewModel = new ViewModelProvider(getActivity()).get(MainActivityViewModel.class);
+        SensorManager sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+        binding.sphericalView.setSensorManager(sensorManager);
+        binding.sphericalView.setVisibility(View.GONE);
+        //Gyro sensor
+
     }
 
     @Override
@@ -124,8 +140,10 @@ public class PostFragment extends Fragment {
         if (mPost == null) return;
 
         mPlayer = ExoPlayerFactory.newSimpleInstance(getContext());
+        mPlayerSpherical = ExoPlayerFactory.newSimpleInstance(getContext());
         mPlayer.addListener(eventListener);
         binding.videoView.setPlayer(mPlayer);
+        binding.sphericalView.setPlayer(mPlayerSpherical);
 
         MediaSource mediaSource = buildMediaSource(mPost);
         mPlayer.prepare(mediaSource, false, false);
@@ -252,8 +270,28 @@ public class PostFragment extends Fragment {
 
     private void updatePlay(int position) {
 
-        mPlayer.seekTo(2 * position, 0);
-        mainActivityViewModel.updateLiveScore(position);
+        //mPlayer.seekTo(2 * position, 0);
+        //mainActivityViewModel.updateLiveScore(position);
+        tempCode();
+
+    }
+
+    private void tempCode() {
+
+        binding.videoView.setVisibility(View.GONE);
+        binding.sphericalView.setVisibility(View.VISIBLE);
+
+
+        DataSource.Factory dataSourceFactory =
+                new DefaultDataSourceFactory(getContext(), getString(R.string.app_name));
+        ProgressiveMediaSource.Factory mediaSourceFactory =
+                new ProgressiveMediaSource.Factory(dataSourceFactory);
+
+        Uri uri = Uri.parse(URL_360);
+        MediaSource mediaSource = mediaSourceFactory.createMediaSource(uri);
+
+        mPlayerSpherical.prepare(mediaSource, false, false);
+        mPlayerSpherical.setPlayWhenReady(true);
 
     }
 
@@ -283,6 +321,9 @@ public class PostFragment extends Fragment {
 
         setFragmentVisibility(true);
         resumePlayer();
+        if (binding.sphericalView.getVisibility() == View.VISIBLE){
+            binding.sphericalView.registerListener();
+        }
     }
 
     @Override
@@ -293,6 +334,9 @@ public class PostFragment extends Fragment {
         setFragmentVisibility(false);
         resetPlayer();
 
+        if (binding.sphericalView.getVisibility() == View.VISIBLE){
+            binding.sphericalView.unRegisterListener();
+        }
     }
 
     @Override
@@ -326,6 +370,10 @@ public class PostFragment extends Fragment {
         Log.i(TAG, "onDetach: " + fragmentIndex);
     }
 
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+    }
 
     private Player.EventListener eventListener = new Player.EventListener() {
 

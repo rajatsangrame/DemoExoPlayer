@@ -16,14 +16,24 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:use_controller="false"
-            />
+            app:use_controller="false" />
+
+        <com.example.rajat.demo.SphericalPlayerView
+            android:id="@+id/spherical_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:surface_type="spherical_view"
+            app:use_controller="true" />
 
         <com.example.rajat.demo.mgpl.InteractionTemplateLayout
-            android:visibility="gone"
             android:id="@+id/interactionLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:visibility="gone" />
 
     </FrameLayout>
 
