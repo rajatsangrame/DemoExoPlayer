@@ -16,7 +16,9 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:use_controller="false" />
+            app:surface_type="texture_view"
+            app:use_controller="true" />
+
 
         <com.example.rajat.demo.SphericalPlayerView
             android:id="@+id/spherical_view"
@@ -33,7 +35,16 @@
             android:id="@+id/interactionLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone" />
+            android:visibility="visible" />
+
+        <com.google.android.exoplayer2.ui.PlayerControlView
+            android:id="@+id/control_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </FrameLayout>
 

@@ -3,9 +3,7 @@ package com.example.rajat.demo;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -48,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
                 .get(MainActivityViewModel.class);
 
         Gson gson = new Gson();
-        Response response = gson.fromJson(Constants.JSON, Response.class);
+        Response response = gson.fromJson(Constants.DEMO, Response.class);
 
         List<Post> postsList = response.getPosts();
         ViewPagerAdapter adapter = new ViewPagerAdapter(this, postsList);
@@ -62,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
             binding.tvScore.setText(String.format("Score: %s", score));
             Log.i(TAG, "onCreate: " + score);
         });
-
 
     }
 

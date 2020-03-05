@@ -1,9 +1,8 @@
 package com.example.rajat.demo;
 
 
-import android.app.Activity;
 import android.content.Context;
-import android.hardware.Sensor;
+import android.graphics.Color;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -34,9 +33,12 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.exoplayer2.ui.PlayerControlView;
+import com.google.android.exoplayer2.upstream.AssetDataSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +51,17 @@ public class PostFragment extends Fragment {
     private static final String TAG = "PostFragment";
     //public static final String URL_360 = "https://raw.githubusercontent.com/rajatsangrame/temp/master/Shark%203d%20360%20-%20panocam3d.com.mp4";
     public static final String URL_360 = "https://theyouthbuzz.com/ytplayer/Seoul8KVR3DTrailer.mp4";
+
+    /*
+    private static final String MAIN = "https://raw.githubusercontent.com/rajatsangrame/temp/master/Main20Cam201.mp4";
+    private static final String CAM2 = "https://raw.githubusercontent.com/rajatsangrame/temp/master/Cam202.mp4";
+    private static final String CAM3 = "https://raw.githubusercontent.com/rajatsangrame/temp/master/Cam203.mp4";
+     */
+
+    private static final String MAIN = "assets:///MainCam201.mp4";
+    private static final String CAM2 = "assets:///Cam202.mp4";
+    private static final String CAM3 = "assets:///Cam203.mp4";
+
 
     private int fragmentIndex;
     private FragmentPostBinding binding;
@@ -143,9 +156,24 @@ public class PostFragment extends Fragment {
         mPlayerSpherical = ExoPlayerFactory.newSimpleInstance(getContext());
         mPlayer.addListener(eventListener);
         binding.videoView.setPlayer(mPlayer);
+        binding.videoView.setShutterBackgroundColor(Color.TRANSPARENT);
+        binding.controlView.setPlayer(mPlayer);
+        binding.controlView.setProgressUpdateListener(new PlayerControlView.ProgressUpdateListener() {
+            @Override
+            public void onProgressUpdate(long position, long bufferedPosition) {
+
+                Log.i(TAG, "onProgressUpdate: " + position);
+
+                if ((int )position == 82000) {
+                    Gfs gfs = new Gson().fromJson(Constants.BTN_3, Gfs.class);
+                    binding.interactionLayout.addGf(gfs);
+                }
+            }
+        });
         binding.sphericalView.setPlayer(mPlayerSpherical);
 
-        MediaSource mediaSource = buildMediaSource(mPost);
+        //MediaSource mediaSource = buildMediaSource(mPost);
+        MediaSource mediaSource = buildMediaSource();
         mPlayer.prepare(mediaSource, false, false);
 
     }
@@ -226,6 +254,31 @@ public class PostFragment extends Fragment {
         return concatenatingMediaSource;
     }
 
+    private MediaSource buildMediaSource() {
+
+        // These factories are used to construct two media sources below
+//        DataSource.Factory dataSourceFactory =
+//                new DefaultDataSourceFactory(getContext(), getString(R.string.app_name));
+
+        DataSource.Factory dataSourceFactory = () -> new AssetDataSource(getContext());
+
+        ProgressiveMediaSource.Factory mediaSourceFactory =
+                new ProgressiveMediaSource.Factory(dataSourceFactory);
+
+        Uri mainUri = Uri.parse(MAIN);
+        MediaSource m1 = mediaSourceFactory.createMediaSource(mainUri);
+
+        Uri uri2 = Uri.parse(CAM2);
+        MediaSource m2 = mediaSourceFactory.createMediaSource(uri2);
+
+        Uri uri3 = Uri.parse(CAM3);
+        MediaSource m3 = mediaSourceFactory.createMediaSource(uri3);
+
+        return new ConcatenatingMediaSource(m1, m2, m3);
+
+    }
+
+
     private void pausePlayer() {
 
         Log.i(TAG, "pausePlayer: ");
@@ -270,9 +323,11 @@ public class PostFragment extends Fragment {
 
     private void updatePlay(int position) {
 
-        //mPlayer.seekTo(2 * position, 0);
-        //mainActivityViewModel.updateLiveScore(position);
-        tempCode();
+        playbackPosition = mPlayer.getCurrentPosition();
+        mPlayer.seekTo(/*2*/ position, playbackPosition);
+        mainActivityViewModel.updateLiveScore(position);
+        Log.i(TAG, "updatePlay: " + playbackPosition);
+        //tempCode();
 
     }
 
@@ -321,7 +376,7 @@ public class PostFragment extends Fragment {
 
         setFragmentVisibility(true);
         resumePlayer();
-        if (binding.sphericalView.getVisibility() == View.VISIBLE){
+        if (binding.sphericalView.getVisibility() == View.VISIBLE) {
             binding.sphericalView.registerListener();
         }
     }
@@ -334,7 +389,7 @@ public class PostFragment extends Fragment {
         setFragmentVisibility(false);
         resetPlayer();
 
-        if (binding.sphericalView.getVisibility() == View.VISIBLE){
+        if (binding.sphericalView.getVisibility() == View.VISIBLE) {
             binding.sphericalView.unRegisterListener();
         }
     }
@@ -395,6 +450,8 @@ public class PostFragment extends Fragment {
         @Override
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
 
+            Log.i(TAG, "onPlayerStateChanged: " + playbackState);
+
         }
 
         @Override
@@ -422,6 +479,7 @@ public class PostFragment extends Fragment {
 
             int sourceIndex = mPlayer.getCurrentWindowIndex();
 
+            /*
             if (sourceIndex % 2 == 1) {
 
                 mPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
@@ -433,6 +491,7 @@ public class PostFragment extends Fragment {
                 showBoomerangOptions(false);
 
             }
+             */
 
             switch (sourceIndex) {
 
@@ -477,5 +536,48 @@ public class PostFragment extends Fragment {
     public void setFragmentVisibility(boolean fragmentVisibility) {
         this.fragmentVisibility = fragmentVisibility;
     }
+
+
+//    private void prepareExoPlayerFromAssetResourceFile(int current_file) {
+//
+//        exoPlayer = ExoPlayerFactory.newSimpleInstance(this, new DefaultTrackSelector((TrackSelection.Factory) null), new DefaultLoadControl());
+//        exoPlayer.addListener(eventListener);
+//
+//
+//        //DataSpec dataSpec = new DataSpec(Uri.parse("asset:///001.mp3"));
+//        DataSpec dataSpec = new DataSpec(Uri.parse("asset:///" + (current_file) + ".mp3"));
+//        final AssetDataSource assetDataSource = new AssetDataSource(getContext());
+//        try {
+//            assetDataSource.open(dataSpec);
+//        } catch (AssetDataSource.AssetDataSourceException e) {
+//            e.printStackTrace();
+//        }
+//
+//        DataSource.Factory factory = new DataSource.Factory() {
+//            @Override
+//            public DataSource createDataSource() {
+//                //return rawResourceDataSource;
+//                return assetDataSource;
+//            }
+//        };
+//
+//        MediaSource audioSource = new ExtractorMediaSource(assetDataSource.getUri(),
+//                factory, new DefaultExtractorsFactory(), null, null);
+//
+//
+//
+//   /*
+//    MediaSource audioSource1 = new ExtractorMediaSource(
+//            Uri.parse("asset:///" + getfileName(current_file)), // file audio ada di folder assets
+//            new DefaultDataSourceFactory(this, userAgent),
+//            new DefaultExtractorsFactory  (),
+//            null,
+//            null
+//    );
+//
+//    */
+//        exoPlayer.prepare(audioSource);
+//
+//    }
 
 }
