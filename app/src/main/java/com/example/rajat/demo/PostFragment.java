@@ -2,17 +2,23 @@ package com.example.rajat.demo;
 
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -62,7 +68,6 @@ public class PostFragment extends Fragment {
     private static final String CAM2 = "assets:///Cam202.mp4";
     private static final String CAM3 = "assets:///Cam203.mp4";
 
-
     private int fragmentIndex;
     private FragmentPostBinding binding;
     private Post mPost;
@@ -103,7 +108,6 @@ public class PostFragment extends Fragment {
         SensorManager sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         binding.sphericalView.setSensorManager(sensorManager);
         binding.sphericalView.setVisibility(View.GONE);
-        //Gyro sensor
 
     }
 
@@ -120,7 +124,7 @@ public class PostFragment extends Fragment {
     private void init() {
 
         initializePlayer();
-        updateInteractiveLayout(mPost);
+        //updateInteractiveLayout(mPost);
         binding.interactionLayout.setInteractiveItemClickListener(interactionListener);
 
     }
@@ -157,6 +161,7 @@ public class PostFragment extends Fragment {
         mPlayer.addListener(eventListener);
         binding.videoView.setPlayer(mPlayer);
         binding.videoView.setShutterBackgroundColor(Color.TRANSPARENT);
+        /*
         binding.controlView.setPlayer(mPlayer);
         binding.controlView.setProgressUpdateListener(new PlayerControlView.ProgressUpdateListener() {
             @Override
@@ -164,12 +169,13 @@ public class PostFragment extends Fragment {
 
                 Log.i(TAG, "onProgressUpdate: " + position);
 
-                if ((int )position == 82000) {
+                if ((int) position == 82000) {
                     Gfs gfs = new Gson().fromJson(Constants.BTN_3, Gfs.class);
                     binding.interactionLayout.addGf(gfs);
                 }
             }
         });
+        */
         binding.sphericalView.setPlayer(mPlayerSpherical);
 
         //MediaSource mediaSource = buildMediaSource(mPost);
@@ -265,17 +271,24 @@ public class PostFragment extends Fragment {
         ProgressiveMediaSource.Factory mediaSourceFactory =
                 new ProgressiveMediaSource.Factory(dataSourceFactory);
 
-        Uri mainUri = Uri.parse(MAIN);
-        MediaSource m1 = mediaSourceFactory.createMediaSource(mainUri);
+//        Uri mainUri = Uri.parse(MAIN);
+//        MediaSource m1 = mediaSourceFactory.createMediaSource(mainUri);
+//
+//        Uri uri2 = Uri.parse(CAM2);
+//        MediaSource m2 = mediaSourceFactory.createMediaSource(uri2);
+//
+//        Uri uri3 = Uri.parse(CAM3);
+//        MediaSource m3 = mediaSourceFactory.createMediaSource(uri3);
 
-        Uri uri2 = Uri.parse(CAM2);
-        MediaSource m2 = mediaSourceFactory.createMediaSource(uri2);
+        ConcatenatingMediaSource concat = new ConcatenatingMediaSource();
+        for (int i = 0; i < 7; i++) {
 
-        Uri uri3 = Uri.parse(CAM3);
-        MediaSource m3 = mediaSourceFactory.createMediaSource(uri3);
+            Uri uri = Uri.parse("assets:///Maverick_" + i + ".mp4");
+            MediaSource m = mediaSourceFactory.createMediaSource(uri);
+            concat.addMediaSource(m);
+        }
 
-        return new ConcatenatingMediaSource(m1, m2, m3);
-
+        return concat;
     }
 
 
@@ -308,7 +321,6 @@ public class PostFragment extends Fragment {
         }
     }
 
-
     private void releasePlayer() {
 
         Log.i(TAG, "releasePlayer: ");
@@ -323,8 +335,19 @@ public class PostFragment extends Fragment {
 
     private void updatePlay(int position) {
 
-        playbackPosition = mPlayer.getCurrentPosition();
-        mPlayer.seekTo(/*2*/ position, playbackPosition);
+        //Even
+        binding.interactionLayout.removeAllViews();
+        showBoomerangOptions(false);
+
+        int currentWindowIndex = mPlayer.getCurrentWindowIndex();
+        //playbackPosition = mPlayer.getCurrentPosition();
+        if (position == 0) {
+            mPlayer.seekTo(currentWindowIndex, playbackPosition);
+
+        } else {
+            mPlayer.seekTo(currentWindowIndex + 1, playbackPosition);
+        }
+        resumePlayer();
         mainActivityViewModel.updateLiveScore(position);
         Log.i(TAG, "updatePlay: " + playbackPosition);
         //tempCode();
@@ -335,7 +358,6 @@ public class PostFragment extends Fragment {
 
         binding.videoView.setVisibility(View.GONE);
         binding.sphericalView.setVisibility(View.VISIBLE);
-
 
         DataSource.Factory dataSourceFactory =
                 new DefaultDataSourceFactory(getContext(), getString(R.string.app_name));
@@ -479,6 +501,65 @@ public class PostFragment extends Fragment {
 
             int sourceIndex = mPlayer.getCurrentWindowIndex();
 
+            if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+                return;
+            }
+            Log.i(TAG, "onPositionDiscontinuity: " + sourceIndex);
+
+
+            if (sourceIndex % 2 != 0) {
+
+
+                if (sourceIndex == 1) {
+                    pausePlayer();
+                    Gson gson = new Gson();
+                    Gfs[] gfs = gson.fromJson(Constants.G1, Gfs[].class);
+                    binding.interactionLayout.setFont("Poppins-BlackItalic.ttf");
+                    binding.interactionLayout.setTemplateId(0);
+                    for (Gfs gf : gfs) {
+                        binding.interactionLayout.addGf(gf);
+                    }
+//                    new Handler().postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//
+//                            showBoomerangOptions(true);
+//                        }
+//                    }, 200);
+
+                    showBoomerangOptions(true);
+
+
+                } else if (sourceIndex == 3) {
+                    pausePlayer();
+                    Gson gson = new Gson();
+                    Gfs[] gfs = gson.fromJson(Constants.G2, Gfs[].class);
+                    binding.interactionLayout.setFont("Poppins-BlackItalic.ttf");
+                    binding.interactionLayout.setTemplateId(0);
+                    for (Gfs gf : gfs) {
+                        binding.interactionLayout.addGf(gf);
+                    }
+//                    new Handler().postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//
+//                            showBoomerangOptions(true);
+//                        }
+//                    }, 500);
+
+                    showBoomerangOptions(true);
+
+
+//                } else if (sourceIndex == 5) {
+//                    Gfs[] gfs = gson.fromJson(Constants.G3, Gfs[].class);
+//                    for (Gfs gf : gfs) {
+//                        binding.interactionLayout.addGf(gf);
+//                    }
+                }
+
+            } else {
+                //showBoomerangOptions(false);
+            }
             /*
             if (sourceIndex % 2 == 1) {
 
@@ -528,6 +609,7 @@ public class PostFragment extends Fragment {
 
         }
     }
+
 
     public boolean getFragmentVisibility() {
         return fragmentVisibility;
@@ -581,3 +663,4 @@ public class PostFragment extends Fragment {
 //    }
 
 }
+

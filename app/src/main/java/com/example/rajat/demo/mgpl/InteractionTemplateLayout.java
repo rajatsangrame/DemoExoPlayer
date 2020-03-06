@@ -23,6 +23,8 @@ import com.example.rajat.demo.model.Gfs;
  * Created by Sourabh Gupta on 26/12/19.
  */
 public class InteractionTemplateLayout extends FrameLayout {
+
+    private static final String TAG = "InteractionTemplateLayo";
     int templateId = 1;
     int colorId = 1;
     String font = "";
@@ -91,6 +93,18 @@ public class InteractionTemplateLayout extends FrameLayout {
         if (gif.getNxt() == -1) {
 //            textView.setMaxTextSize(AppUtils.dpToPx(70));
 //            textView.setMinTextSize(AppUtils.dpToPx(18));
+            switch (templateId) {
+
+                case 0:
+                    textView.setBackgroundResource(R.drawable.ic_template_one_ques_background);
+                    break;
+                case 1:
+                    textView.setBackgroundResource(R.drawable.ic_template_two_ques_background);
+                    break;
+                case 2:
+                    textView.setBackgroundResource(R.drawable.ic_template_three_ques_background);
+                    break;
+            }
             textView.setPadding(AppUtils.dpToPx(28), AppUtils.dpToPx(15), AppUtils.dpToPx(28), AppUtils.dpToPx(15));
         } else {
 //            textView.setMaxTextSize(AppUtils.dpToPx(22));
@@ -112,7 +126,6 @@ public class InteractionTemplateLayout extends FrameLayout {
             }
         });
         textView.setFont(this.font);
-        addView(textView);
         if (gif.getNxt() == -1) {
             quesEditText = textView;
         } else if (gif.getNxt() == 1) {
@@ -120,6 +133,9 @@ public class InteractionTemplateLayout extends FrameLayout {
         } else if (gif.getNxt() == 2) {
             secondOptionEditText = textView;
         }
+
+        addView(textView);
+
         Log.e("edittext_w", (gif.getW() * App.getScreenWidth()) / 100 + "");
         Log.e("edittext_h", ((gif.getH() * App.getScreenHeight()) / 100) + "");
     }
