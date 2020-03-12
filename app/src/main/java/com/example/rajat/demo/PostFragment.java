@@ -145,6 +145,11 @@ public class PostFragment extends Fragment {
 
         } else if (mPost.getType().equals("bvf")) {
 
+            if (mPost.getTracks().getData().size() == 1) {
+                //Playing Contest Video
+                mPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
+                return;
+            }
             List<Gfs> gifList = new ArrayList<>();
             int templateId = -1;
             String font = "";
@@ -590,8 +595,10 @@ public class PostFragment extends Fragment {
             } else if (mPost.getType().equals("bvf")) {
 
                 int sourceIndex = mPlayer.getCurrentWindowIndex();
+                Log.i(TAG, "onPositionDiscontinuity: " + sourceIndex);
 
-                if (sourceIndex % 2 == 1) {
+
+                if (sourceIndex % 2 == 1 || sourceIndex == 0) {
                     mPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
                     showBoomerangOptions(true);
                 } else {
