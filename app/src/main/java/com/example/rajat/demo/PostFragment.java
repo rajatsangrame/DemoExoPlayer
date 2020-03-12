@@ -133,14 +133,36 @@ public class PostFragment extends Fragment {
 
     private void updateInteractiveLayout(Post post) {
 
-        Collections.reverse(mGifLIst);
-        for (Data data : post.getTracks().getData()) {
+        if (mPost.getType().equals("story")) {
 
-            if (data.getGfs() != null) {
+            Collections.reverse(mGifLIst);
+            for (Data data : post.getTracks().getData()) {
+
+                if (data.getTemp() != null) {
+                    mTemp = data.getTemp();
+                }
             }
 
-            if (data.getTemp() != null) {
-                mTemp = data.getTemp();
+        } else if (mPost.getType().equals("bvf")) {
+
+            List<Gfs> gifList = new ArrayList<>();
+            int templateId = -1;
+            String font = "";
+            for (Data data : post.getTracks().getData()) {
+
+                if (data.getGfs() != null) {
+                    gifList.addAll(data.getGfs());
+                }
+
+                if (data.getTemp() != null) {
+                    font = data.getTemp().getFont();
+                    templateId = data.getTemp().getType();
+                }
+            }
+            binding.interactionLayout.setFont(font);
+            binding.interactionLayout.setTemplateId(templateId);
+            for (int i = 0; i < gifList.size(); i++) {
+                binding.interactionLayout.addGf(gifList.get(i));
             }
         }
     }
@@ -171,10 +193,13 @@ public class PostFragment extends Fragment {
         */
         binding.sphericalView.setPlayer(mPlayerSpherical);
 
-        //MediaSource mediaSource = buildMediaSource(mPost);
-        MediaSource mediaSource = buildMediaSource(mPost.getTracks());
-        mPlayer.prepare(mediaSource, false, false);
-
+        if (mPost.getType().equals("story")) {
+            MediaSource mediaSource = buildMediaSource(mPost.getTracks());
+            mPlayer.prepare(mediaSource, false, false);
+        } else if (mPost.getType().equals("bvf")) {
+            MediaSource mediaSource = buildMediaSource(mPost);
+            mPlayer.prepare(mediaSource, false, false);
+        }
     }
 
     private String getTypeFromIndex(int index) {
@@ -361,21 +386,29 @@ public class PostFragment extends Fragment {
 
     private void updatePlay(int position) {
 
-        //Even
-        showBoomerangOptions(false);
+        if (mPost.getType().equals("story")) {
 
-        int currentWindowIndex = mPlayer.getCurrentWindowIndex();
-        //playbackPosition = mPlayer.getCurrentPosition();
-        if (position == 0 || position == 99) {
-            mPlayer.seekTo(currentWindowIndex, playbackPosition);
+            binding.interactionLayout.removeAllViews();
+            showBoomerangOptions(false);
 
-        } else {
-            mPlayer.seekTo(currentWindowIndex + 1, playbackPosition);
+            int currentWindowIndex = mPlayer.getCurrentWindowIndex();
+            if (position == 0 || position == 99) {
+                mPlayer.seekTo(currentWindowIndex, playbackPosition);
+
+            } else {
+                mPlayer.seekTo(currentWindowIndex + 1, playbackPosition);
+            }
+            resumePlayer();
+            //mainActivityViewModel.updateLiveScore(position);
+
+        } else if (mPost.getType().equals("bvf")) {
+
+            playbackPosition = mPlayer.getCurrentPosition();
+            mPlayer.seekTo(2 * position, playbackPosition);
+            //mainActivityViewModel.updateLiveScore(position);
         }
-        resumePlayer();
-        mainActivityViewModel.updateLiveScore(position);
+
         Log.i(TAG, "updatePlay: " + playbackPosition);
-        //tempCode();
 
     }
 
@@ -524,34 +557,48 @@ public class PostFragment extends Fragment {
         @Override
         public void onPositionDiscontinuity(int reason) {
 
-            if (reason == Player.DISCONTINUITY_REASON_SEEK) {
-                return;
-            }
+            if (mPost.getType().equals("story")) {
 
-            int index = mPlayer.getCurrentWindowIndex();
-            String type = getTypeFromIndex(index);
 
-            Log.i(TAG, "onPositionDiscontinuity: " + index);
-            Log.i(TAG, "onPositionDiscontinuity: " + type);
+                if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+                    return;
+                }
 
-            switch (type) {
-                case "base":
-                    showBoomerangOptions(false);
-                    break;
-                case "node":
-                    pausePlayer();
-                    List<Gfs> gfs = getGif();
-                    binding.interactionLayout.setFont(mTemp.getFont());
-                    binding.interactionLayout.setTemplateId(mTemp.getType());
-                    for (Gfs gf : gfs) {
-                        binding.interactionLayout.addGf(gf);
-                    }
+                int index = mPlayer.getCurrentWindowIndex();
+                String type = getTypeFromIndex(index);
+
+                Log.i(TAG, "onPositionDiscontinuity: " + index);
+                Log.i(TAG, "onPositionDiscontinuity: " + type);
+
+                switch (type) {
+                    case "base":
+                        showBoomerangOptions(false);
+                        break;
+                    case "node":
+                        pausePlayer();
+                        List<Gfs> gfs = getGif();
+                        binding.interactionLayout.setFont(mTemp.getFont());
+                        binding.interactionLayout.setTemplateId(mTemp.getType());
+                        for (Gfs gf : gfs) {
+                            binding.interactionLayout.addGf(gf);
+                        }
+                        showBoomerangOptions(true);
+                        break;
+                    default:
+                        break;
+                }
+            } else if (mPost.getType().equals("bvf")) {
+
+                int sourceIndex = mPlayer.getCurrentWindowIndex();
+
+                if (sourceIndex % 2 == 1) {
+                    mPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
                     showBoomerangOptions(true);
-                    break;
-                default:
-                    break;
+                } else {
+                    mPlayer.setRepeatMode(Player.REPEAT_MODE_OFF);
+                    showBoomerangOptions(false);
+                }
             }
-
 
         }
 
@@ -578,7 +625,6 @@ public class PostFragment extends Fragment {
             binding.interactionLayout.setVisibility(View.VISIBLE);
 
         } else {
-            binding.interactionLayout.removeAllViews();
             binding.interactionLayout.setVisibility(View.GONE);
         }
     }
