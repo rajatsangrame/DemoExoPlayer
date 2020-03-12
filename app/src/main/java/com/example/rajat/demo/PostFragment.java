@@ -1,24 +1,19 @@
 package com.example.rajat.demo;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -28,6 +23,8 @@ import com.example.rajat.demo.mgpl.InteractionTemplateLayout;
 import com.example.rajat.demo.model.Data;
 import com.example.rajat.demo.model.Gfs;
 import com.example.rajat.demo.model.Post;
+import com.example.rajat.demo.model.Temp;
+import com.example.rajat.demo.model.Tracks;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -39,15 +36,16 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.upstream.AssetDataSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Ref: 360 Video https://stackoverflow.com/questions/60166742/how-to-enable-gyrosensors-for-exoplayer-360-videos
@@ -77,6 +75,10 @@ public class PostFragment extends Fragment {
     private int currentWindow = 0;
     private long playbackPosition = 0;
     private MainActivityViewModel mainActivityViewModel;
+    List<List<Gfs>> mGifLIst = new ArrayList<>();
+    private Temp mTemp;
+    private List<String> indexTypeList = new ArrayList<>();
+
 
     private InteractionTemplateLayout.InteractiveItemClickListener interactionListener
             = this::updatePlay;
@@ -124,31 +126,22 @@ public class PostFragment extends Fragment {
     private void init() {
 
         initializePlayer();
-        //updateInteractiveLayout(mPost);
+        updateInteractiveLayout(mPost);
         binding.interactionLayout.setInteractiveItemClickListener(interactionListener);
 
     }
 
     private void updateInteractiveLayout(Post post) {
 
-        List<Gfs> gifList = new ArrayList<>();
-        int templateId = -1;
-        String font = "";
+        Collections.reverse(mGifLIst);
         for (Data data : post.getTracks().getData()) {
 
             if (data.getGfs() != null) {
-                gifList.addAll(data.getGfs());
             }
 
             if (data.getTemp() != null) {
-                font = data.getTemp().getFont();
-                templateId = data.getTemp().getType();
+                mTemp = data.getTemp();
             }
-        }
-        binding.interactionLayout.setFont(font);
-        binding.interactionLayout.setTemplateId(templateId);
-        for (int i = 0; i < gifList.size(); i++) {
-            binding.interactionLayout.addGf(gifList.get(i));
         }
     }
 
@@ -179,8 +172,34 @@ public class PostFragment extends Fragment {
         binding.sphericalView.setPlayer(mPlayerSpherical);
 
         //MediaSource mediaSource = buildMediaSource(mPost);
-        MediaSource mediaSource = buildMediaSource();
+        MediaSource mediaSource = buildMediaSource(mPost.getTracks());
         mPlayer.prepare(mediaSource, false, false);
+
+    }
+
+    private String getTypeFromIndex(int index) {
+
+        try {
+            return indexTypeList.get(index);
+
+        } catch (IndexOutOfBoundsException e) {
+            return "";
+        }
+    }
+
+
+    private int gifIndex = 0;
+
+    private List<Gfs> getGif() {
+
+        List<Gfs> list = new ArrayList<>();
+        try {
+            list.addAll(mGifLIst.get(gifIndex));
+            gifIndex++;
+            return list;
+        } catch (NullPointerException e) {
+            return list;
+        }
 
     }
 
@@ -260,32 +279,37 @@ public class PostFragment extends Fragment {
         return concatenatingMediaSource;
     }
 
-    private MediaSource buildMediaSource() {
-
-        // These factories are used to construct two media sources below
-//        DataSource.Factory dataSourceFactory =
-//                new DefaultDataSourceFactory(getContext(), getString(R.string.app_name));
+    private MediaSource buildMediaSource(Tracks tracks) {
 
         DataSource.Factory dataSourceFactory = () -> new AssetDataSource(getContext());
 
         ProgressiveMediaSource.Factory mediaSourceFactory =
                 new ProgressiveMediaSource.Factory(dataSourceFactory);
 
-//        Uri mainUri = Uri.parse(MAIN);
-//        MediaSource m1 = mediaSourceFactory.createMediaSource(mainUri);
-//
-//        Uri uri2 = Uri.parse(CAM2);
-//        MediaSource m2 = mediaSourceFactory.createMediaSource(uri2);
-//
-//        Uri uri3 = Uri.parse(CAM3);
-//        MediaSource m3 = mediaSourceFactory.createMediaSource(uri3);
-
         ConcatenatingMediaSource concat = new ConcatenatingMediaSource();
-        for (int i = 0; i < 7; i++) {
 
-            Uri uri = Uri.parse("assets:///Maverick_" + i + ".mp4");
+        List<Data> data = tracks.getData();
+        for (int i = 0; i < data.size(); i++) {
+
+            if (data.get(i).getUrl() == null || data.get(i).getUrl().isEmpty()) {
+                continue;
+            }
+
+            Uri uri = Uri.parse("assets:///" + data.get(i).getUrl());
             MediaSource m = mediaSourceFactory.createMediaSource(uri);
             concat.addMediaSource(m);
+
+            if (data.get(i).getGfs() != null && !data.get(i).getGfs().isEmpty()) {
+                mGifLIst.add(data.get(i).getGfs());
+            }
+
+            if (data.get(i).getTyp() != null && !data.get(i).getTyp().equals("boomerang")) {
+                indexTypeList.add(data.get(i).getTyp());
+            }
+
+            if (data.get(i).getTracks() != null && data.get(i).getTracks().getData() != null) {
+                concat.addMediaSource(buildMediaSource(data.get(i).getTracks()));
+            }
         }
 
         return concat;
@@ -319,6 +343,8 @@ public class PostFragment extends Fragment {
             pausePlayer();
             mPlayer.seekTo(currentWindow, playbackPosition);
         }
+        showBoomerangOptions(false);
+        gifIndex = 0;
     }
 
     private void releasePlayer() {
@@ -336,12 +362,11 @@ public class PostFragment extends Fragment {
     private void updatePlay(int position) {
 
         //Even
-        binding.interactionLayout.removeAllViews();
         showBoomerangOptions(false);
 
         int currentWindowIndex = mPlayer.getCurrentWindowIndex();
         //playbackPosition = mPlayer.getCurrentPosition();
-        if (position == 0) {
+        if (position == 0 || position == 99) {
             mPlayer.seekTo(currentWindowIndex, playbackPosition);
 
         } else {
@@ -472,7 +497,7 @@ public class PostFragment extends Fragment {
         @Override
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
 
-            Log.i(TAG, "onPlayerStateChanged: " + playbackState);
+            //Log.i(TAG, "onPlayerStateChanged: " + playbackState);
 
         }
 
@@ -499,86 +524,34 @@ public class PostFragment extends Fragment {
         @Override
         public void onPositionDiscontinuity(int reason) {
 
-            int sourceIndex = mPlayer.getCurrentWindowIndex();
-
             if (reason == Player.DISCONTINUITY_REASON_SEEK) {
                 return;
             }
-            Log.i(TAG, "onPositionDiscontinuity: " + sourceIndex);
 
+            int index = mPlayer.getCurrentWindowIndex();
+            String type = getTypeFromIndex(index);
 
-            if (sourceIndex % 2 != 0) {
+            Log.i(TAG, "onPositionDiscontinuity: " + index);
+            Log.i(TAG, "onPositionDiscontinuity: " + type);
 
-
-                if (sourceIndex == 1) {
+            switch (type) {
+                case "base":
+                    showBoomerangOptions(false);
+                    break;
+                case "node":
                     pausePlayer();
-                    Gson gson = new Gson();
-                    Gfs[] gfs = gson.fromJson(Constants.G1, Gfs[].class);
-                    binding.interactionLayout.setFont("Poppins-BlackItalic.ttf");
-                    binding.interactionLayout.setTemplateId(0);
+                    List<Gfs> gfs = getGif();
+                    binding.interactionLayout.setFont(mTemp.getFont());
+                    binding.interactionLayout.setTemplateId(mTemp.getType());
                     for (Gfs gf : gfs) {
                         binding.interactionLayout.addGf(gf);
                     }
-//                    new Handler().postDelayed(new Runnable() {
-//                        @Override
-//                        public void run() {
-//
-//                            showBoomerangOptions(true);
-//                        }
-//                    }, 200);
-
                     showBoomerangOptions(true);
-
-
-                } else if (sourceIndex == 3) {
-                    pausePlayer();
-                    Gson gson = new Gson();
-                    Gfs[] gfs = gson.fromJson(Constants.G2, Gfs[].class);
-                    binding.interactionLayout.setFont("Poppins-BlackItalic.ttf");
-                    binding.interactionLayout.setTemplateId(0);
-                    for (Gfs gf : gfs) {
-                        binding.interactionLayout.addGf(gf);
-                    }
-//                    new Handler().postDelayed(new Runnable() {
-//                        @Override
-//                        public void run() {
-//
-//                            showBoomerangOptions(true);
-//                        }
-//                    }, 500);
-
-                    showBoomerangOptions(true);
-
-
-//                } else if (sourceIndex == 5) {
-//                    Gfs[] gfs = gson.fromJson(Constants.G3, Gfs[].class);
-//                    for (Gfs gf : gfs) {
-//                        binding.interactionLayout.addGf(gf);
-//                    }
-                }
-
-            } else {
-                //showBoomerangOptions(false);
-            }
-            /*
-            if (sourceIndex % 2 == 1) {
-
-                mPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
-                showBoomerangOptions(true);
-
-            } else {
-
-                mPlayer.setRepeatMode(Player.REPEAT_MODE_OFF);
-                showBoomerangOptions(false);
-
-            }
-             */
-
-            switch (sourceIndex) {
-
-                case 1:
+                    break;
+                default:
                     break;
             }
+
 
         }
 
@@ -605,8 +578,8 @@ public class PostFragment extends Fragment {
             binding.interactionLayout.setVisibility(View.VISIBLE);
 
         } else {
+            binding.interactionLayout.removeAllViews();
             binding.interactionLayout.setVisibility(View.GONE);
-
         }
     }
 

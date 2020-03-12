@@ -43,16 +43,116 @@ public class Constants {
             "                      {\n" +
             "                        \"pos\": 0,\n" +
             "                        \"typ\": \"base\",\n" +
-            "                        \"url\": \"Maverick_4.mp4, Maverick_5.mp4, Maverick_5.mp4\"\n" +
+            "                        \"url\": \"Maverick_4.mp4\"\n" +
+            "                      },\n" +
+            "                      {\n" +
+            "                        \"pos\": 1,\n" +
+            "                        \"typ\": \"node\",\n" +
+            "                        \"url\": \"Maverick_5.mp4\",\n" +
+            "                        \"tracks\": {\n" +
+            "                          \"data\": [\n" +
+            "                            {\n" +
+            "                              \"pos\": 0,\n" +
+            "                              \"typ\": \"node\",\n" +
+            "                              \"url\": \"Maverick_6.mp4\",\n" +
+            "                              \"tracks\": {\n" +
+            "                                \"data\": [\n" +
+            "                                  {\n" +
+            "                                    \"pos\": 0,\n" +
+            "                                    \"typ\": \"none\",\n" +
+            "                                    \"url\": \"Maverick_7.mp4\",\n" +
+            "                                    \"tracks\":{}\n" +
+            "                                  },\n" +
+            "                                  {\n" +
+            "                                    \"gfs\": [\n" +
+            "                                      \n" +
+            "                                    ],\n" +
+            "                                    \"pos\": 0,\n" +
+            "                                    \"temp\": {\n" +
+            "                                    },\n" +
+            "                                    \"title\": \"\",\n" +
+            "                                    \"typ\": \"boomerang\",\n" +
+            "                                    \"url\": \"boomerang.mp4\"\n" +
+            "                                  }\n" +
+            "                                ]\n" +
+            "                              }\n" +
+            "                            },\n" +
+            "                            {\n" +
+            "                              \"gfs\": [\n" +
+            "                                {\n" +
+            "                                  \"fontSize\": 7.1296296,\n" +
+            "                                  \"h\": 20.521654,\n" +
+            "                                  \"id\": \"title\",\n" +
+            "                                  \"nxt\": -1,\n" +
+            "                                  \"rotation\": -7.774304,\n" +
+            "                                  \"scale\": 0.91260064,\n" +
+            "                                  \"txt\": \"Extend Wing ?\",\n" +
+            "                                  \"w\": 90.55556,\n" +
+            "                                  \"x\": 7.025419,\n" +
+            "                                  \"y\": 46.582924\n" +
+            "                                },\n" +
+            "                                {\n" +
+            "                                  \"color\": \"#f4b130\",\n" +
+            "                                  \"fontSize\": 6.0185184,\n" +
+            "                                  \"h\": 5.777559,\n" +
+            "                                  \"id\": \"btn1\",\n" +
+            "                                  \"nxt\": 99,\n" +
+            "                                  \"rotation\": 0.0,\n" +
+            "                                  \"scale\": 1.0,\n" +
+            "                                  \"txt\": \"Yes\",\n" +
+            "                                  \"w\": 25.333332,\n" +
+            "                                  \"x\": 10.930892,\n" +
+            "                                  \"y\": 72.42975\n" +
+            "                                }\n" +
+            "                              ],\n" +
+            "                              \"pos\": 2,\n" +
+            "                              \"temp\": {\n" +
+            "                                \"font\": \"Poppins-BlackItalic.ttf\",\n" +
+            "                                \"type\": 0\n" +
+            "                              },\n" +
+            "                              \"title\": \"\",\n" +
+            "                              \"typ\": \"boomerang\",\n" +
+            "                              \"url\": \"boomerang.mp4\"\n" +
+            "                            }\n" +
+            "                          ]\n" +
+            "                        }\n" +
             "                      },\n" +
             "                      {\n" +
             "                        \"gfs\": [\n" +
-            "                          \n" +
+            "                          {\n" +
+            "                            \"fontSize\": 7.1296296,\n" +
+            "                            \"h\": 20.521654,\n" +
+            "                            \"id\": \"title\",\n" +
+            "                            \"nxt\": -1,\n" +
+            "                            \"rotation\": -7.774304,\n" +
+            "                            \"scale\": 0.91260064,\n" +
+            "                            \"txt\": \"Close Canopy\",\n" +
+            "                            \"w\": 90.55556,\n" +
+            "                            \"x\": 7.025419,\n" +
+            "                            \"y\": 46.582924\n" +
+            "                          },\n" +
+            "                          {\n" +
+            "                            \"color\": \"#f4b130\",\n" +
+            "                            \"fontSize\": 6.0185184,\n" +
+            "                            \"h\": 5.777559,\n" +
+            "                            \"id\": \"btn1\",\n" +
+            "                            \"nxt\": 99,\n" +
+            "                            \"rotation\": 0.0,\n" +
+            "                            \"scale\": 1.0,\n" +
+            "                            \"txt\": \"yes\",\n" +
+            "                            \"w\": 25.333332,\n" +
+            "                            \"x\": 10.930892,\n" +
+            "                            \"y\": 72.42975\n" +
+            "                          }\n" +
             "                        ],\n" +
-            "                        \"pos\": 3,\n" +
+            "                        \"pos\": 2,\n" +
             "                        \"temp\": {\n" +
-            "                        \n" +
-            "                        }\n" +
+            "                          \"font\": \"Poppins-BlackItalic.ttf\",\n" +
+            "                          \"type\": 0\n" +
+            "                        },\n" +
+            "                        \"title\": \"\",\n" +
+            "                        \"typ\": \"boomerang\",\n" +
+            "                        \"url\": \"boomerang.mp4\"\n" +
             "                      }\n" +
             "                    ]\n" +
             "                  }\n" +
@@ -180,7 +280,7 @@ public class Constants {
             "      },\n" +
             "      \"state\": \"\",\n" +
             "      \"username\": \"PadminiTThampi\",\n" +
-            "      \"type\": \"bvf\",\n" +
+            "      \"type\": \"story\",\n" +
             "      \"challengeDescription\": \"\",\n" +
             "      \"challengeName\": \"\",\n" +
             "      \"challengeRounds\": 0,\n" +

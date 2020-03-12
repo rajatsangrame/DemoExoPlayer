@@ -29,7 +29,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:surface_type="spherical_view"
-            app:use_controller="true" />
+            app:use_controller="false" />
 
         <com.example.rajat.demo.mgpl.InteractionTemplateLayout
             android:id="@+id/interactionLayout"

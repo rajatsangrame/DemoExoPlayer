@@ -23,6 +23,9 @@ public class Data {
 	@SerializedName("url")
 	private String url;
 
+	@SerializedName("tracks")
+	private Tracks tracks;
+
 	public void setTemp(Temp temp){
 		this.temp = temp;
 	}
@@ -69,6 +72,14 @@ public class Data {
 
 	public String getUrl(){
 		return url;
+	}
+
+	public Tracks getTracks() {
+		return tracks;
+	}
+
+	public void setTracks(Tracks tracks) {
+		this.tracks = tracks;
 	}
 
 	@Override

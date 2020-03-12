@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
                 .get(MainActivityViewModel.class);
 
         Gson gson = new Gson();
-        Response response = gson.fromJson(Constants.DEMO, Response.class);
+        Response response = gson.fromJson(Constants.STORY_JSON, Response.class);
 
         List<Post> postsList = response.getPosts();
         ViewPagerAdapter adapter = new ViewPagerAdapter(this, postsList);
