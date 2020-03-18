@@ -38,6 +38,10 @@ public class Gfs {
     @Expose
     private Float fontSize;
 
+    @SerializedName("trackId")
+    @Expose
+    private String trackId;
+
     private Float rotation;
     private Float scale;
 
@@ -140,5 +144,13 @@ public class Gfs {
 
     public void setFontSize(Float fontSize) {
         this.fontSize = fontSize;
+    }
+
+    public String getTrackId() {
+        return trackId;
+    }
+
+    public void setTrackId(String trackId) {
+        this.trackId = trackId;
     }
 }

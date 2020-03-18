@@ -80,7 +80,7 @@ public class InteractionTemplateLayout extends FrameLayout {
                                 @Override
                                 public void run() {
                                     if (interactiveItemClickListener != null) {
-                                        interactiveItemClickListener.interactiveItemClicked(gif.getNxt());
+                                        interactiveItemClickListener.interactiveItemClicked(gif.getNxt(), gif.getTrackId());
                                     }
                                 }
                             }).start();
@@ -151,7 +151,7 @@ public class InteractionTemplateLayout extends FrameLayout {
     }
 
     public interface InteractiveItemClickListener {
-        void interactiveItemClicked(int pos);
+        void interactiveItemClicked(int position, String trackId);
     }
 
 
