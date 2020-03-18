@@ -25,6 +25,7 @@ import com.example.rajat.demo.model.Gfs;
 import com.example.rajat.demo.model.Post;
 import com.example.rajat.demo.model.Temp;
 import com.example.rajat.demo.model.Tracks;
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -36,10 +37,12 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.upstream.AssetDataSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -178,9 +181,16 @@ public class PostFragment extends Fragment {
 
         mPlayer = ExoPlayerFactory.newSimpleInstance(getContext());
         mPlayerSpherical = ExoPlayerFactory.newSimpleInstance(getContext());
-        mPlayer.addListener(eventListener);
         binding.videoView.setPlayer(mPlayer);
         binding.videoView.setShutterBackgroundColor(Color.TRANSPARENT);
+        //binding.videoView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL);
+
+        //Bellow line will ensure that aspect ratio is correctly maintained even for 4:3 videos.
+        binding.videoView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
+        mPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+
+        mPlayer.addListener(eventListener);
+
         /*
         binding.controlView.setPlayer(mPlayer);
         binding.controlView.setProgressUpdateListener(new PlayerControlView.ProgressUpdateListener() {
@@ -199,13 +209,17 @@ public class PostFragment extends Fragment {
         binding.sphericalView.setPlayer(mPlayerSpherical);
 
         if (mPost.getType().equals("story")) {
-            MediaSource mediaSource = buildMediaSource(mPost.getTracks());
+            //MediaSource mediaSource = buildMediaSource(mPost.getTracks());
+            MediaSource mediaSource = jugaadMediaSource(mPost.getTracks());
+            length = ((ConcatenatingMediaSource) mediaSource).getSize();
             mPlayer.prepare(mediaSource, false, false);
         } else if (mPost.getType().equals("bvf")) {
             MediaSource mediaSource = buildMediaSource(mPost);
             mPlayer.prepare(mediaSource, false, false);
         }
     }
+
+    int length = 0;
 
     private String getTypeFromIndex(int index) {
 
@@ -345,6 +359,84 @@ public class PostFragment extends Fragment {
         return concat;
     }
 
+    private MediaSource jugaadMediaSource(final Tracks tracks) {
+
+        DataSource.Factory dataSourceFactory = () -> new AssetDataSource(getContext());
+
+        ProgressiveMediaSource.Factory mediaSourceFactory =
+                new ProgressiveMediaSource.Factory(dataSourceFactory);
+
+        ConcatenatingMediaSource concat = new ConcatenatingMediaSource();
+
+        Uri uri = Uri.parse("assets:///intro.mp4");
+        MediaSource m = mediaSourceFactory.createMediaSource(uri);
+        concat.addMediaSource(m);
+        Uri uri2 = Uri.parse("assets:///Q1.mp4");
+        MediaSource m2 = mediaSourceFactory.createMediaSource(uri2);
+        concat.addMediaSource(m2);
+        Uri uri3 = Uri.parse("assets:///B.mp4");
+        MediaSource m3 = mediaSourceFactory.createMediaSource(uri3);
+        concat.addMediaSource(m3);
+        Uri uri4 = Uri.parse("assets:///Q3.mp4");
+        MediaSource m4 = mediaSourceFactory.createMediaSource(uri4);
+        concat.addMediaSource(m4);
+        Uri uri5 = Uri.parse("assets:///B1.mp4");
+        MediaSource m5 = mediaSourceFactory.createMediaSource(uri5);
+        concat.addMediaSource(m5);
+        Uri uri6 = Uri.parse("assets:///B2.mp4");
+        MediaSource m6 = mediaSourceFactory.createMediaSource(uri6);
+        concat.addMediaSource(m6);
+        Uri uri7 = Uri.parse("assets:///Q2.mp4");
+        MediaSource m7 = mediaSourceFactory.createMediaSource(uri7);
+        concat.addMediaSource(m7);
+        Uri uri8 = Uri.parse("assets:///B3.mp4");
+        MediaSource m8 = mediaSourceFactory.createMediaSource(uri8);
+        concat.addMediaSource(m8);
+        Uri uri9 = Uri.parse("assets:///B4.mp4");
+        MediaSource m9 = mediaSourceFactory.createMediaSource(uri9);
+        concat.addMediaSource(m9);
+        Uri uri10 = Uri.parse("assets:///Q3.mp4");
+        MediaSource m10 = mediaSourceFactory.createMediaSource(uri10);
+        concat.addMediaSource(m10);
+        Uri uri11 = Uri.parse("assets:///B5.mp4");
+        MediaSource m11 = mediaSourceFactory.createMediaSource(uri11);
+        concat.addMediaSource(m11);
+        Uri uri12 = Uri.parse("assets:///B6.mp4");
+        MediaSource m12 = mediaSourceFactory.createMediaSource(uri12);
+        concat.addMediaSource(m12);
+        Uri uri13 = Uri.parse("assets:///C.mp4");
+        MediaSource m13 = mediaSourceFactory.createMediaSource(uri13);
+        concat.addMediaSource(m13);
+        Uri uri14 = Uri.parse("assets:///Q3.mp4");
+        MediaSource m14 = mediaSourceFactory.createMediaSource(uri14);
+        concat.addMediaSource(m14);
+        Uri uri15 = Uri.parse("assets:///C1.mp4");
+        MediaSource m15 = mediaSourceFactory.createMediaSource(uri15);
+        concat.addMediaSource(m15);
+        Uri uri16 = Uri.parse("assets:///C2.mp4");
+        MediaSource m16 = mediaSourceFactory.createMediaSource(uri16);
+        concat.addMediaSource(m16);
+        Uri uri17 = Uri.parse("assets:///Q2.mp4");
+        MediaSource m17 = mediaSourceFactory.createMediaSource(uri17);
+        concat.addMediaSource(m17);
+        Uri uri18 = Uri.parse("assets:///C3.mp4");
+        MediaSource m18 = mediaSourceFactory.createMediaSource(uri18);
+        concat.addMediaSource(m18);
+        Uri uri19 = Uri.parse("assets:///C4.mp4");
+        MediaSource m19 = mediaSourceFactory.createMediaSource(uri19);
+        concat.addMediaSource(m19);
+        Uri uri20 = Uri.parse("assets:///Q3.mp4");
+        MediaSource m20 = mediaSourceFactory.createMediaSource(uri20);
+        concat.addMediaSource(m20);
+        Uri uri21 = Uri.parse("assets:///C5.mp4");
+        MediaSource m21 = mediaSourceFactory.createMediaSource(uri21);
+        concat.addMediaSource(m21);
+        Uri uri22 = Uri.parse("assets:///C6.mp4");
+        MediaSource m22 = mediaSourceFactory.createMediaSource(uri22);
+        concat.addMediaSource(m22);
+
+        return concat;
+    }
 
     private void pausePlayer() {
 
@@ -393,6 +485,34 @@ public class PostFragment extends Fragment {
 
         if (mPost.getType().equals("story")) {
 
+            showBoomerangOptions(false);
+            binding.interactionLayout.removeAllViews();
+
+            int currentWindowIndex = mPlayer.getCurrentWindowIndex();
+
+            switch (currentWindowIndex) {
+
+                case 2:
+                    if (position != 0)
+                        mPlayer.seekTo(13, playbackPosition);
+                    break;
+                case 4:
+                case 14:
+                case 6:
+                case 7:
+                case 17:
+                case 10:
+                case 20:
+                    if (position != 0)
+                        mPlayer.seekTo(currentWindowIndex + 1, playbackPosition);
+                    break;
+
+            }
+
+            resumePlayer();
+
+            //region Commented
+            /*
             binding.interactionLayout.removeAllViews();
             showBoomerangOptions(false);
 
@@ -411,6 +531,8 @@ public class PostFragment extends Fragment {
             playbackPosition = mPlayer.getCurrentPosition();
             mPlayer.seekTo(2 * position, playbackPosition);
             //mainActivityViewModel.updateLiveScore(position);
+            */
+            //endregion
         }
 
         Log.i(TAG, "updatePlay: " + playbackPosition);
@@ -562,9 +684,92 @@ public class PostFragment extends Fragment {
         @Override
         public void onPositionDiscontinuity(int reason) {
 
+            if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+                return;
+            }
+
             if (mPost.getType().equals("story")) {
 
+                int sourceIndex = mPlayer.getCurrentWindowIndex();
+                Log.i(TAG, "onPositionDiscontinuity: " + sourceIndex);
+                int templateId = 0;
+                String font = "Poppins-BlackItalic.ttf";
 
+                switch (sourceIndex) {
+
+                    case 2:
+                        pausePlayer();
+
+                        Gfs[] gifList = new Gson().fromJson(Constants.G1, Gfs[].class);
+
+                        binding.interactionLayout.setFont(font);
+                        binding.interactionLayout.setTemplateId(templateId);
+                        for (Gfs gfs : gifList) {
+                            binding.interactionLayout.addGf(gfs);
+                        }
+                        showBoomerangOptions(true);
+                        break;
+
+                    case 4:
+                    case 14:
+
+                        pausePlayer();
+                        gifList = new Gson().fromJson(Constants.G3, Gfs[].class);
+
+                        binding.interactionLayout.setFont(font);
+                        binding.interactionLayout.setTemplateId(templateId);
+                        for (Gfs gfs : gifList) {
+                            binding.interactionLayout.addGf(gfs);
+                        }
+                        showBoomerangOptions(true);
+                        break;
+
+                    case 7:
+                    case 17:
+
+                        pausePlayer();
+                        gifList = new Gson().fromJson(Constants.G2, Gfs[].class);
+
+                        binding.interactionLayout.setFont(font);
+                        binding.interactionLayout.setTemplateId(templateId);
+                        for (Gfs gfs : gifList) {
+                            binding.interactionLayout.addGf(gfs);
+                        }
+                        showBoomerangOptions(true);
+                        break;
+
+                    case 5:
+                    case 8:
+                    case 15:
+                    case 18:
+                        mPlayer.seekTo(sourceIndex + 1, playbackPosition);
+                        break;
+
+                    case 10:
+                    case 20:
+                        pausePlayer();
+                        gifList = new Gson().fromJson(Constants.G4, Gfs[].class);
+
+                        binding.interactionLayout.setFont(font);
+                        binding.interactionLayout.setTemplateId(templateId);
+                        for (Gfs gfs : gifList) {
+                            binding.interactionLayout.addGf(gfs);
+                        }
+                        showBoomerangOptions(true);
+                        break;
+
+                    case 11:
+                    case 12:
+                    case 21:
+                    case 22:
+                        mPlayer.setPlayWhenReady(false);
+                        mPlayer.seekTo(0, 0);
+                        break;
+
+                }
+
+                //region Commented
+                /*
                 if (reason == Player.DISCONTINUITY_REASON_SEEK) {
                     return;
                 }
@@ -573,7 +778,7 @@ public class PostFragment extends Fragment {
                 String type = getTypeFromIndex(index);
 
                 Log.i(TAG, "onPositionDiscontinuity: " + index);
-                Log.i(TAG, "onPositionDiscontinuity: " + type);
+                //Log.i(TAG, "onPositionDiscontinuity: " + type);
 
                 switch (type) {
                     case "base":
@@ -592,6 +797,9 @@ public class PostFragment extends Fragment {
                     default:
                         break;
                 }
+                 */
+                //endregion
+
             } else if (mPost.getType().equals("bvf")) {
 
                 int sourceIndex = mPlayer.getCurrentWindowIndex();

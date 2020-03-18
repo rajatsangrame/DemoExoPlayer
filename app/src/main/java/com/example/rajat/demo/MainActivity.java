@@ -7,11 +7,13 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 
 import com.example.rajat.demo.databinding.ActivityMainBinding;
 import com.example.rajat.demo.mgpl.App;
@@ -45,8 +47,10 @@ public class MainActivity extends AppCompatActivity {
         viewModel = new ViewModelProvider(this)
                 .get(MainActivityViewModel.class);
 
+        hideSystemUI(0);
+
         Gson gson = new Gson();
-        Response response = gson.fromJson(Constants.URL_POSTS, Response.class);
+        Response response = gson.fromJson(Constants.HITCHED, Response.class);
 
         List<Post> postsList = response.getPosts();
         ViewPagerAdapter adapter = new ViewPagerAdapter(this, postsList);
@@ -109,6 +113,15 @@ public class MainActivity extends AppCompatActivity {
                         // Hide the nav bar and status bar
                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_FULLSCREEN);
+    }
+
+    private void hideSystemUI(int ingnored) {
+        View decorView = getWindow().getDecorView();
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        getWindow().setStatusBarColor(Color.TRANSPARENT);
+
     }
 
     void setWindowScreenParameters() {
