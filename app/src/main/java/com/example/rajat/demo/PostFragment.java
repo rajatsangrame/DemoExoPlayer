@@ -209,6 +209,7 @@ public class PostFragment extends Fragment {
             }
         });
         */
+
         binding.sphericalView.setPlayer(mPlayerSpherical);
 
         mIndexTypeList = new ArrayList<>();
@@ -237,8 +238,6 @@ public class PostFragment extends Fragment {
              */
             //endregion
 
-            //MediaSource mediaSource = buildMediaSource(mPost.getTracks());
-            //mPlayer.prepare(mediaSource, false, false);
         } else if (mPost.getType().equals("bvf")) {
             MediaSource mediaSource = buildMediaSource(mPost);
             mPlayer.prepare(mediaSource, false, false);
@@ -280,8 +279,11 @@ public class PostFragment extends Fragment {
      * https://yovo-app.storage.googleapis.com/zuyYZmQWg/yo240p/intro.mp4
      * https://yovo-app.storage.googleapis.com/zuyYZmQWg/yo240p/1.mp4
      * https://yovo-app.storage.googleapis.com/zuyYZmQWg/yo240p/2.mp4
-     * https://yovo-app.storage.googleapis.com/zuyYZmQWg/yo240p/boomerang.mp4
+     * https://yovo-app.storage.googleapis.com/zuyYZmQWg/boomerang.mp4
      * <p>
+     * <p>
+     * <p>
+     * Prepare media source for branch videos
      * <p>
      * Todo: Write the sequence of concatenation here and why
      *
@@ -331,41 +333,12 @@ public class PostFragment extends Fragment {
         return concatenatingMediaSource;
     }
 
-    private void loadTracks(Tracks track) {
-
-        if (mFirstTrack == null) {
-            mFirstTrack = track;
-        }
-        List<Data> data = track.getData();
-
-        if (!mTracksHashMap.containsKey(track.getTrackId())) {
-            mTracksHashMap.put(track.getTrackId(), track);
-        }
-        for (int i = 0; i < data.size(); i++) {
-
-            if (data.get(i).getTracks() != null
-                    && data.get(i).getTracks().getData() != null) {
-
-                loadTracks(data.get(i).getTracks());
-            }
-        }
-
-    }
-
-    private void preparePlayer(Tracks track) {
-
-        if (mTracksHashMap.isEmpty() || track == null) return;
-
-        MediaSource mediaSource = buildMediaSourceFromMap(track);
-        mPlayer.prepare(mediaSource, false, false);
-
-    }
-
     private MediaSource buildMediaSourceFromMap(Tracks track) {
 
         mGifList = new ArrayList<>();
 
-        DataSource.Factory dataSourceFactory = () -> new AssetDataSource(getContext());
+        DataSource.Factory dataSourceFactory =
+                new DefaultDataSourceFactory(getContext(), getString(R.string.app_name));
         ProgressiveMediaSource.Factory mediaSourceFactory =
                 new ProgressiveMediaSource.Factory(dataSourceFactory);
 
@@ -396,42 +369,78 @@ public class PostFragment extends Fragment {
         return mConcatMediaSource;
     }
 
-    private MediaSource buildMediaSource(Tracks tracks) {
+    /**
+     * Prepare media source for story videos
+     *
+     * @param track @{@link Tracks}
+     * @return @{@link ConcatenatingMediaSource}
+     */
+    private MediaSource buildMediaSource(Tracks track) {
 
-        DataSource.Factory dataSourceFactory = () -> new AssetDataSource(getContext());
+        mGifList = new ArrayList<>();
 
+        DataSource.Factory dataSourceFactory =
+                new DefaultDataSourceFactory(getContext(), getString(R.string.app_name));
         ProgressiveMediaSource.Factory mediaSourceFactory =
                 new ProgressiveMediaSource.Factory(dataSourceFactory);
 
-        ConcatenatingMediaSource concat = new ConcatenatingMediaSource();
+        List<Data> dataList = track.getData();
+        for (Data data : dataList) {
 
-        List<Data> data = tracks.getData();
+            if (data.getUrl() != null && !data.getUrl().isEmpty() && !data.getTyp().equals("boomerang")) {
 
+                Uri uri = Uri.parse(Constants.BASE_URL_2 + data.getUrl());
+                MediaSource m = mediaSourceFactory.createMediaSource(uri);
+                mConcatMediaSource.addMediaSource(m);
+                mIndexTypeList.add(data.getTyp());
+            }
+
+
+            if (data.getTemp() != null) {
+
+                mTemp = data.getTemp();
+            }
+
+            if (data.getGfs() != null && !data.getGfs().isEmpty()) {
+
+                mGifList.addAll(data.getGfs());
+            }
+
+        }
+
+        return mConcatMediaSource;
+    }
+
+    private void loadTracks(Tracks track) {
+
+        if (mFirstTrack == null) {
+            mFirstTrack = track;
+        }
+        List<Data> data = track.getData();
+
+        if (!mTracksHashMap.containsKey(track.getTrackId())) {
+            mTracksHashMap.put(track.getTrackId(), track);
+        }
         for (int i = 0; i < data.size(); i++) {
 
-            if (data.get(i).getUrl() == null || data.get(i).getUrl().isEmpty()) {
-                continue;
-            }
+            if (data.get(i).getTracks() != null
+                    && data.get(i).getTracks().getData() != null) {
 
-            Uri uri = Uri.parse("assets:///" + data.get(i).getUrl());
-            MediaSource m = mediaSourceFactory.createMediaSource(uri);
-            concat.addMediaSource(m);
-
-            if (data.get(i).getGfs() != null && !data.get(i).getGfs().isEmpty()) {
-                //mGifLIst.add(data.get(i).getGfs());
-            }
-
-            if (data.get(i).getTyp() != null && !data.get(i).getTyp().equals("boomerang")) {
-                mIndexTypeList.add(data.get(i).getTyp());
-            }
-
-            if (data.get(i).getTracks() != null && data.get(i).getTracks().getData() != null) {
-                concat.addMediaSource(buildMediaSource(data.get(i).getTracks()));
+                loadTracks(data.get(i).getTracks());
             }
         }
 
-        return concat;
     }
+
+    private void preparePlayer(Tracks track) {
+
+        if (mTracksHashMap.isEmpty() || track == null) return;
+
+        MediaSource mediaSource = buildMediaSource(track);
+        mPlayer.prepare(mediaSource, false, false);
+
+    }
+
 
     private void pausePlayer() {
 
