@@ -140,8 +140,10 @@ public class PostFragment extends Fragment {
         if (post.getType().equals("story")) {
 
             binding.interactionLayout.removeAllViews();
-            binding.interactionLayout.setFont(mTemp.getFont());
-            binding.interactionLayout.setTemplateId(mTemp.getType());
+            if (mTemp != null) {
+                binding.interactionLayout.setFont(mTemp.getFont());
+                binding.interactionLayout.setTemplateId(mTemp.getType());
+            }
             for (Gfs gf : mGifList) {
                 binding.interactionLayout.addGf(gf);
 
@@ -217,6 +219,23 @@ public class PostFragment extends Fragment {
         if (mPost.getType().equals("story")) {
             loadTracks(mPost.getTracks());
             preparePlayer(mFirstTrack);
+
+            //region Logs
+            /*
+            for (Tracks tracks : mTracksHashMap.values()) {
+
+                Log.i(TAG, "initializePlayer: ---------------------");
+
+                Log.i(TAG, "initializePlayer: " + tracks.getTrackId());
+
+                for (Data d : tracks.getData()) {
+
+                    Log.i(TAG, "initializePlayer: " + d.getUrl());
+                }
+
+            }
+             */
+            //endregion
 
             //MediaSource mediaSource = buildMediaSource(mPost.getTracks());
             //mPlayer.prepare(mediaSource, false, false);
@@ -444,7 +463,6 @@ public class PostFragment extends Fragment {
             updateInteractiveLayout(mPost);
         }
         showBoomerangOptions(false);
-        gifIndex = 0;
     }
 
     private void releasePlayer() {
@@ -466,13 +484,31 @@ public class PostFragment extends Fragment {
             showBoomerangOptions(false);
 
             final int currentIndex = mPlayer.getCurrentWindowIndex();
+            boolean isIndexChanged = true;
             if (position == 0) {
-                mConcatMediaSource.moveMediaSource(currentIndex, currentIndex + 1);
+                try {
+
+                    int nextIndex = currentIndex + 1;
+                    if (mConcatMediaSource.getMediaSource(nextIndex) != null) {
+                        mConcatMediaSource.moveMediaSource(currentIndex, currentIndex + 1);
+                        mPlayer.next();
+                    } else {
+                        isIndexChanged = false;
+                    }
+
+                } catch (IndexOutOfBoundsException e) {
+                    isIndexChanged = false;
+                    Log.i(TAG, "updatePlay: " + e.getMessage());
+                } catch (Exception e) {
+                    isIndexChanged = false;
+                    if (BuildConfig.DEBUG) throw new RuntimeException("Something is wrong");
+                }
+            } else {
+                mPlayer.next();
             }
 
-            mPlayer.next();
             //mPlayer.seekTo(currentIndex + 1, playbackPosition);
-            removeMedia(currentIndex);
+            removeMedia(currentIndex, isIndexChanged);
             resumePlayer();
 
             Tracks track = mTracksHashMap.get(trackId);
@@ -493,7 +529,13 @@ public class PostFragment extends Fragment {
 
     }
 
-    private void removeMedia(int index) {
+    private void removeMedia(int index, boolean isIndexChanged) {
+
+        if (!isIndexChanged) {
+
+            Log.i(TAG, "removeMedia Index Not Changed: ");
+            return;
+        }
 
         Log.i(TAG, "removeMedia Size Before: " + mConcatMediaSource.getSize());
         Log.i(TAG, "removeMedia Size Before: " + mIndexTypeList.size());
