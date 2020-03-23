@@ -273,6 +273,25 @@ public class PostFragment extends Fragment {
         return null;
     }
 
+    private Uri getBoomerangUri(Tracks track) {
+
+        //String baseUrl = Constants.BASE_URL;
+        //String postId = post.getId() + "/";
+
+        for (Data data : track.getData()) {
+
+            if (data.getTyp().equalsIgnoreCase("boomerang")) {
+                //String videoUrl = data.getUrl();
+                //String ulr = String.format("%s%s%s", baseUrl, postId, videoUrl);
+                //return Uri.parse(ulr);
+                return Uri.parse("assets:///" + data.getUrl());
+            }
+        }
+
+        Log.e(TAG, "getBoomerangUri: is null");
+        return null;
+    }
+
     /**
      * Sample Urls:
      * <p>
@@ -333,26 +352,48 @@ public class PostFragment extends Fragment {
         return concatenatingMediaSource;
     }
 
-    private MediaSource buildMediaSourceFromMap(Tracks track) {
+    private MediaSource buildMediaSourceFromAssets(Tracks track) {
 
         mGifList = new ArrayList<>();
 
-        DataSource.Factory dataSourceFactory =
-                new DefaultDataSourceFactory(getContext(), getString(R.string.app_name));
+        DataSource.Factory dataSourceFactory = () -> new AssetDataSource(getContext());
         ProgressiveMediaSource.Factory mediaSourceFactory =
                 new ProgressiveMediaSource.Factory(dataSourceFactory);
 
+        int totalBaseTrack = getTotalBaseTrack(track);
+        int totalNodeTrack = getTotalNodeTrack(track);
+        int baseTrackCount = 0;
+        Uri boomerangUri = getBoomerangUri(track);
+        MediaSource mediaSourceBoomerang = mediaSourceFactory.createMediaSource(boomerangUri);
+
         List<Data> dataList = track.getData();
+
+        if (totalBaseTrack == 0 && totalNodeTrack == 1) {
+            mConcatMediaSource.addMediaSource(mediaSourceBoomerang);
+            mIndexTypeList.add("boomerang");
+        }
+
         for (Data data : dataList) {
 
-            if (data.getUrl() != null && !data.getUrl().isEmpty() && !data.getTyp().equals("boomerang")) {
+            if (data.getUrl() != null && !data.getUrl().isEmpty()
+                    && !data.getTyp().equalsIgnoreCase("boomerang")) {
 
                 Uri uri = Uri.parse("assets:///" + data.getUrl());
                 MediaSource m = mediaSourceFactory.createMediaSource(uri);
                 mConcatMediaSource.addMediaSource(m);
                 mIndexTypeList.add(data.getTyp());
-            }
 
+                if (data.getTyp().equalsIgnoreCase("base")) {
+                    baseTrackCount++;
+                }
+
+                if (data.getTyp().equalsIgnoreCase("base")
+                        && baseTrackCount == totalBaseTrack) {
+                    mConcatMediaSource.addMediaSource(mediaSourceBoomerang);
+                    mIndexTypeList.add("boomerang");
+
+                }
+            }
 
             if (data.getTemp() != null) {
 
@@ -371,6 +412,8 @@ public class PostFragment extends Fragment {
 
     /**
      * Prepare media source for story videos
+     * <p>
+     * Write the order of concat
      *
      * @param track @{@link Tracks}
      * @return @{@link ConcatenatingMediaSource}
@@ -387,7 +430,7 @@ public class PostFragment extends Fragment {
         List<Data> dataList = track.getData();
         for (Data data : dataList) {
 
-            if (data.getUrl() != null && !data.getUrl().isEmpty() && !data.getTyp().equals("boomerang")) {
+            if (data.getUrl() != null && !data.getUrl().isEmpty()) {
 
                 Uri uri = Uri.parse(Constants.BASE_URL_2 + data.getUrl());
                 MediaSource m = mediaSourceFactory.createMediaSource(uri);
@@ -411,11 +454,39 @@ public class PostFragment extends Fragment {
         return mConcatMediaSource;
     }
 
+    private int getTotalBaseTrack(Tracks track) {
+
+        int count = 0;
+
+        for (Data data : track.getData()) {
+
+            if (data.getTyp().equalsIgnoreCase("base")) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+
+    private int getTotalNodeTrack(Tracks track) {
+
+        int count = 0;
+
+        for (Data data : track.getData()) {
+
+            if (data.getTyp().equalsIgnoreCase("node")) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     private void loadTracks(Tracks track) {
 
         if (mFirstTrack == null) {
             mFirstTrack = track;
         }
+
         List<Data> data = track.getData();
 
         if (!mTracksHashMap.containsKey(track.getTrackId())) {
@@ -436,7 +507,7 @@ public class PostFragment extends Fragment {
 
         if (mTracksHashMap.isEmpty() || track == null) return;
 
-        MediaSource mediaSource = buildMediaSource(track);
+        MediaSource mediaSource = buildMediaSourceFromAssets(track);
         mPlayer.prepare(mediaSource, false, false);
 
     }
@@ -486,45 +557,68 @@ public class PostFragment extends Fragment {
         }
     }
 
+    /**
+     * Todo: Write doc for change index flow
+     *
+     * @param position
+     * @param trackId
+     */
     private void updatePlay(int position, String trackId) {
+
+        Log.i(TAG, "updatePlay: position " + position);
 
         if (mPost.getType().equals("story")) {
 
             showBoomerangOptions(false);
 
             final int currentIndex = mPlayer.getCurrentWindowIndex();
-            boolean isIndexChanged = true;
+            int nextIndex = currentIndex + 2;
+
             if (position == 0) {
                 try {
-
-                    int nextIndex = currentIndex + 1;
                     if (mConcatMediaSource.getMediaSource(nextIndex) != null) {
-                        mConcatMediaSource.moveMediaSource(currentIndex, currentIndex + 1);
-                        mPlayer.next();
+                        // 2 nodes
+                        mConcatMediaSource.moveMediaSource(currentIndex + 1, nextIndex);
+
                     } else {
-                        isIndexChanged = false;
+                        //single node
+                        nextIndex = currentIndex + 1;
                     }
 
                 } catch (IndexOutOfBoundsException e) {
-                    isIndexChanged = false;
+                    //single node
+                    nextIndex = currentIndex + 1;
                     Log.i(TAG, "updatePlay: " + e.getMessage());
                 } catch (Exception e) {
-                    isIndexChanged = false;
+                    nextIndex = currentIndex + 1;
                     if (BuildConfig.DEBUG) throw new RuntimeException("Something is wrong");
                 }
-            } else {
-                mPlayer.next();
+
+            } else if (position == 99) {
+
+                // Skip to next track
+                removeMedia(mConcatMediaSource.getSize() - 1); //remove all
+                Tracks track = mTracksHashMap.get(trackId);
+                if (track != null) {
+                    preparePlayer(track);
+                    updateInteractiveLayout(mPost);
+                }
+
+                mPlayer.setRepeatMode(Player.REPEAT_MODE_OFF);
+                return;
+
             }
 
-            //mPlayer.seekTo(currentIndex + 1, playbackPosition);
-            removeMedia(currentIndex, isIndexChanged);
-            resumePlayer();
+            mPlayer.seekTo(nextIndex, playbackPosition);
+            mPlayer.setRepeatMode(Player.REPEAT_MODE_OFF);
+            removeMedia(nextIndex - 1);
 
             Tracks track = mTracksHashMap.get(trackId);
             if (track != null) {
                 preparePlayer(track);
                 updateInteractiveLayout(mPost);
             }
+
             //mainActivityViewModel.updateLiveScore(position);
 
         } else if (mPost.getType().equals("bvf")) {
@@ -538,13 +632,12 @@ public class PostFragment extends Fragment {
 
     }
 
-    private void removeMedia(int index, boolean isIndexChanged) {
-
-        if (!isIndexChanged) {
-
-            Log.i(TAG, "removeMedia Index Not Changed: ");
-            return;
-        }
+    /**
+     * Todo: Why we need this ?
+     *
+     * @param index
+     */
+    private void removeMedia(int index) {
 
         Log.i(TAG, "removeMedia Size Before: " + mConcatMediaSource.getSize());
         Log.i(TAG, "removeMedia Size Before: " + mIndexTypeList.size());
@@ -722,8 +815,8 @@ public class PostFragment extends Fragment {
                     case "base":
                         showBoomerangOptions(false);
                         break;
-                    case "node":
-                        pausePlayer();
+                    case "boomerang":
+                        mPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
                         showBoomerangOptions(true);
                         break;
                     default:

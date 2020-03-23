@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         hideSystemUI(0);
 
         Gson gson = new Gson();
-        Response response = gson.fromJson(Constants.HITCHED_LIVE, Response.class);
+        Response response = gson.fromJson(Constants.HITCHED, Response.class);
 
         List<Post> postsList = response.getPosts();
         ViewPagerAdapter adapter = new ViewPagerAdapter(this, postsList);
