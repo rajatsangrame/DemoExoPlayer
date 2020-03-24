@@ -565,8 +565,7 @@ public class PostFragment extends Fragment {
 
         Log.i(TAG, "resetPlayer: ");
         if (mPlayer != null) {
-            pausePlayer();
-            mPlayer.seekTo(currentWindow, playbackPosition);
+            releasePlayer();
             initializePlayer();
             updateInteractiveLayout(mPost);
         }
@@ -805,7 +804,6 @@ public class PostFragment extends Fragment {
             if (playbackState == Player.STATE_ENDED) {
                 Log.i(TAG, "onPlayerStateChanged: Ended");
                 resetPlayer();
-                resumePlayer();
             }
 
 
