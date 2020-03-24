@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         hideSystemUI(0);
 
         Gson gson = new Gson();
-        Response response = gson.fromJson(Constants.FIGHTER_PLANE, Response.class);
+        Response response = gson.fromJson(Constants.TWO_STORY, Response.class);
 
         List<Post> postsList = response.getPosts();
         ViewPagerAdapter adapter = new ViewPagerAdapter(this, postsList);
@@ -64,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
             binding.tvScore.setText(String.format("Score: %s", score));
             Log.i(TAG, "onCreate: " + score);
         });
-
     }
 
     /**

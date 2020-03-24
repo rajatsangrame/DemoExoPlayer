@@ -1,8 +1,5 @@
 package com.example.rajat.demo;
 
-import android.app.Application;
-
-import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 

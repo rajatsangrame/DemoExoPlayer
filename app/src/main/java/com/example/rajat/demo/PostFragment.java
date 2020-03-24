@@ -17,6 +17,8 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.rajat.demo.databinding.FragmentPostBinding;
 import com.example.rajat.demo.mgpl.InteractionTemplateLayout;
 import com.example.rajat.demo.model.Data;
@@ -26,6 +28,7 @@ import com.example.rajat.demo.model.Temp;
 import com.example.rajat.demo.model.Tracks;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
@@ -130,7 +133,6 @@ public class PostFragment extends Fragment {
         initializePlayer();
         updateInteractiveLayout(mPost);
         binding.interactionLayout.setInteractiveItemClickListener(interactionListener);
-
     }
 
     private void updateInteractiveLayout(Post post) {
@@ -186,10 +188,10 @@ public class PostFragment extends Fragment {
         mPlayerSpherical = ExoPlayerFactory.newSimpleInstance(getContext());
         binding.videoView.setPlayer(mPlayer);
         binding.videoView.setShutterBackgroundColor(Color.TRANSPARENT);
-        //binding.videoView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL);
+        binding.videoView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL);
 
         //Bellow line will ensure that aspect ratio is correctly maintained even for 4:3 videos.
-        binding.videoView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
+        //binding.videoView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
         mPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
 
         mPlayer.addListener(eventListener);
@@ -220,6 +222,7 @@ public class PostFragment extends Fragment {
         if (mPost.getType().equals("story")) {
             loadTracks(mPost.getTracks());
             preparePlayer(mFirstTrack);
+            binding.tvUser.setText(mPost.getUsername());
 
             //region Logs
             /*
@@ -285,8 +288,8 @@ public class PostFragment extends Fragment {
                 //String videoUrl = data.getUrl();
                 //String ulr = String.format("%s%s%s", baseUrl, postId, videoUrl);
                 //return Uri.parse(ulr);
-                //return Uri.parse("assets:///" + data.getUrl());
-                return Uri.parse(Constants.BASE_URL_2 + data.getUrl());
+                return Uri.parse("assets:///" + data.getUrl());
+                //return Uri.parse(Constants.BASE_URL_2 + data.getUrl());
             }
         }
 
@@ -532,7 +535,7 @@ public class PostFragment extends Fragment {
 
         if (mTracksHashMap.isEmpty() || track == null) return;
 
-        MediaSource mediaSource = buildMediaSource(track);
+        MediaSource mediaSource = buildMediaSourceFromAssets(track);
         mPlayer.prepare(mediaSource, false, false);
 
     }
@@ -797,7 +800,14 @@ public class PostFragment extends Fragment {
         @Override
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
 
-            //Log.i(TAG, "onPlayerStateChanged: " + playbackState);
+            Log.i(TAG, "onPlayerStateChanged: " + playbackState);
+
+            if (playbackState == Player.STATE_ENDED) {
+                Log.i(TAG, "onPlayerStateChanged: Ended");
+                resetPlayer();
+                resumePlayer();
+            }
+
 
         }
 
