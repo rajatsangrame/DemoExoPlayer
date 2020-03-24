@@ -281,10 +281,12 @@ public class PostFragment extends Fragment {
         for (Data data : track.getData()) {
 
             if (data.getTyp().equalsIgnoreCase("boomerang")) {
+
                 //String videoUrl = data.getUrl();
                 //String ulr = String.format("%s%s%s", baseUrl, postId, videoUrl);
                 //return Uri.parse(ulr);
-                return Uri.parse("assets:///" + data.getUrl());
+                //return Uri.parse("assets:///" + data.getUrl());
+                return Uri.parse(Constants.BASE_URL_2 + data.getUrl());
             }
         }
 
@@ -368,7 +370,7 @@ public class PostFragment extends Fragment {
 
         List<Data> dataList = track.getData();
 
-        if (totalBaseTrack == 0 && totalNodeTrack == 1) {
+        if (totalBaseTrack == 0 && totalNodeTrack > 0) {
             mConcatMediaSource.addMediaSource(mediaSourceBoomerang);
             mIndexTypeList.add("boomerang");
         }
@@ -379,8 +381,8 @@ public class PostFragment extends Fragment {
                     && !data.getTyp().equalsIgnoreCase("boomerang")) {
 
                 Uri uri = Uri.parse("assets:///" + data.getUrl());
-                MediaSource m = mediaSourceFactory.createMediaSource(uri);
-                mConcatMediaSource.addMediaSource(m);
+                MediaSource mediaSource = mediaSourceFactory.createMediaSource(uri);
+                mConcatMediaSource.addMediaSource(mediaSource);
                 mIndexTypeList.add(data.getTyp());
 
                 if (data.getTyp().equalsIgnoreCase("base")) {
@@ -427,17 +429,40 @@ public class PostFragment extends Fragment {
         ProgressiveMediaSource.Factory mediaSourceFactory =
                 new ProgressiveMediaSource.Factory(dataSourceFactory);
 
+        int totalBaseTrack = getTotalBaseTrack(track);
+        int totalNodeTrack = getTotalNodeTrack(track);
+        int baseTrackCount = 0;
+        Uri boomerangUri = getBoomerangUri(track);
+        MediaSource mediaSourceBoomerang = mediaSourceFactory.createMediaSource(boomerangUri);
+
         List<Data> dataList = track.getData();
+
+        if (totalBaseTrack == 0 && totalNodeTrack > 0) {
+            mConcatMediaSource.addMediaSource(mediaSourceBoomerang);
+            mIndexTypeList.add("boomerang");
+        }
+
         for (Data data : dataList) {
 
-            if (data.getUrl() != null && !data.getUrl().isEmpty()) {
+            if (data.getUrl() != null && !data.getUrl().isEmpty()
+                    && !data.getTyp().equalsIgnoreCase("boomerang")) {
 
                 Uri uri = Uri.parse(Constants.BASE_URL_2 + data.getUrl());
-                MediaSource m = mediaSourceFactory.createMediaSource(uri);
-                mConcatMediaSource.addMediaSource(m);
+                MediaSource mediaSource = mediaSourceFactory.createMediaSource(uri);
+                mConcatMediaSource.addMediaSource(mediaSource);
                 mIndexTypeList.add(data.getTyp());
-            }
 
+                if (data.getTyp().equalsIgnoreCase("base")) {
+                    baseTrackCount++;
+                }
+
+                if (data.getTyp().equalsIgnoreCase("base")
+                        && baseTrackCount == totalBaseTrack) {
+                    mConcatMediaSource.addMediaSource(mediaSourceBoomerang);
+                    mIndexTypeList.add("boomerang");
+
+                }
+            }
 
             if (data.getTemp() != null) {
 
@@ -507,7 +532,7 @@ public class PostFragment extends Fragment {
 
         if (mTracksHashMap.isEmpty() || track == null) return;
 
-        MediaSource mediaSource = buildMediaSourceFromAssets(track);
+        MediaSource mediaSource = buildMediaSource(track);
         mPlayer.prepare(mediaSource, false, false);
 
     }
