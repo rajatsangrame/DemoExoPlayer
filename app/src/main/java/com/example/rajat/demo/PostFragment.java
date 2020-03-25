@@ -577,8 +577,6 @@ public class PostFragment extends Fragment {
         Log.i(TAG, "releasePlayer: ");
 
         if (mPlayer != null) {
-            playbackPosition = mPlayer.getCurrentPosition();
-            currentWindow = mPlayer.getCurrentWindowIndex();
             mPlayer.release();
             mPlayer = null;
         }
@@ -634,6 +632,8 @@ public class PostFragment extends Fragment {
                 mPlayer.setRepeatMode(Player.REPEAT_MODE_OFF);
                 return;
 
+            } else if (position == 98) {
+                return;
             }
 
             mPlayer.seekTo(nextIndex, playbackPosition);
@@ -804,6 +804,7 @@ public class PostFragment extends Fragment {
             if (playbackState == Player.STATE_ENDED) {
                 Log.i(TAG, "onPlayerStateChanged: Ended");
                 resetPlayer();
+                resumePlayer();
             }
 
 
